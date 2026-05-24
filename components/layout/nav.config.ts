@@ -131,7 +131,7 @@ export const NAV_GROUPS: NavGroupDef[] = [
     description: "Administration",
     icon: ShieldCheck,
     items: [
-      { href: "/dashboard/administration", labelKey: "noticeboard", description: "Notices, meetings & vacation management", icon: LayoutPanelTop, permission: "settings.manage" },
+      { href: "/dashboard/notice-vacation", labelKey: "noticeboard", description: "Notices, meetings & vacation management", icon: LayoutPanelTop, permission: "settings.manage" },
       { href: "/dashboard/audit", labelKey: "audit", description: "Track all actions & changes", icon: ShieldCheck, permission: "members.manage_roles" },
       { href: "/dashboard/permissions", labelKey: "permissions", description: "Role & member access control", icon: KeyRound, permission: "members.manage_roles" },
       { href: "/dashboard/mess", labelKey: "messSettings", description: "Mess info, invite code & meal rules", icon: Building2, permission: "settings.manage" },

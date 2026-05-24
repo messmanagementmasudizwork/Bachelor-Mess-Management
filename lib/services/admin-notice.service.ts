@@ -131,7 +131,7 @@ export const adminNoticeService = {
               type:       "admin_notice" as const,
               title:      `${typeLabel}: ${input.title}`,
               body:       input.body.slice(0, 200),
-              action_url: "/dashboard/administration",
+              action_url: "/dashboard/notice-vacation",
               metadata: {
                 notice_id:   data.id,
                 notice_type: input.notice_type,

@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { VacationTab } from "@/components/mess/VacationTab";
 import { NoticePanel } from "@/components/administration/NoticePanel";
 
-export default function AdministrationPage() {
+export default function NoticeVacationPage() {
   return (
     <div className="space-y-5 animate-fade-in">
       <Tabs defaultValue="notices">
