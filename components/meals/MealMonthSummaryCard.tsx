@@ -175,7 +175,7 @@ export function MealMonthSummaryCard({
                   {stats.actual.vacationOffDays > 0 && (
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
-                        <span className="text-[10px]">🏖️</span><span>মেস ছুটি</span>
+                        <span className="text-[10px]">🏖️</span><span>{t.meals.vacationOffDays}</span>
                       </div>
                       <span className="text-[11px] font-bold px-1.5 py-0.5 rounded-full text-blue-700 bg-blue-50">
                         {stats.actual.vacationOffDays}
@@ -218,7 +218,7 @@ export function MealMonthSummaryCard({
                   <span className="text-[11px] font-semibold text-blue-600">{t.meals.plannedRemaining}</span>
                 </div>
                 {stats.daysLeft === 0 ? (
-                  <p className="text-[10px] text-muted-foreground text-center py-3">মাস শেষ</p>
+                  <p className="text-[10px] text-muted-foreground text-center py-3">{t.meals.monthEnded}</p>
                 ) : (
                   <>
                     {mealIcons.map(({ icon, label }, i) => (
@@ -315,7 +315,7 @@ export function MealMonthSummaryCard({
                               <span>{b.emoji}</span><span>{b.label}</span>
                             </span>
                             <span className="text-muted-foreground tabular-nums">
-                              {b.count} দিন ({Math.round((b.count / Math.max(analytics.totalDays, 1)) * 100)}%)
+                              {t.meals.dayCountFmt.replace("{count}", String(b.count)).replace("{pct}", String(Math.round((b.count / Math.max(analytics.totalDays, 1)) * 100)))}
                             </span>
                           </div>
                           <div className="h-2 rounded-full bg-muted overflow-hidden">

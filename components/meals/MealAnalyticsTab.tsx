@@ -144,7 +144,7 @@ export function MealAnalyticsTab({ myMeals, isLoading, viewMonth, setViewMonth, 
                   <span>{b.label}</span>
                 </span>
                 <span className="text-muted-foreground tabular-nums">
-                  {b.count} দিন ({Math.round((b.count / totalDays) * 100)}%)
+                  {t.meals.dayCountFmt.replace("{count}", String(b.count)).replace("{pct}", String(Math.round((b.count / totalDays) * 100)))}
                 </span>
               </div>
               <div className="h-2.5 rounded-full bg-muted overflow-hidden">

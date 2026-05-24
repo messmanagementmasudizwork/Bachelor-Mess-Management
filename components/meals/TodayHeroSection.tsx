@@ -38,7 +38,7 @@ export function TodayHeroSection({ todayMeal }: Props) {
       <CardHeader className="pb-2 pt-4 px-4">
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-lg font-bold">{t.meals.todayMealsTitle ?? "Today's Meals"}</h1>
+            <h1 className="text-lg font-bold">{t.meals.todayMeals}</h1>
             <p className="text-xs text-muted-foreground mt-0.5">{formatDatePref(today)}</p>
           </div>
           <div className="flex flex-col items-end gap-1">
@@ -48,7 +48,7 @@ export function TodayHeroSection({ todayMeal }: Props) {
             </Badge>
             {isVacationDay && (
               <Badge className="flex items-center gap-1 text-[10px] bg-blue-100 text-blue-700 border border-blue-200 hover:bg-blue-100">
-                🏖️ মেস ছুটি
+                🏖️ {t.meals.vacationLabel}
               </Badge>
             )}
           </div>
@@ -89,7 +89,7 @@ export function TodayHeroSection({ todayMeal }: Props) {
                     ? <Check className="h-2.5 w-2.5" />
                     : <X className="h-2.5 w-2.5" />}
                   <span>
-                    {isOn ? t.meals.mealOn : isVacationOff ? "ছুটি" : t.meals.mealOff}
+                    {isOn ? t.meals.mealOn : isVacationOff ? t.meals.vacationOff : t.meals.mealOff}
                   </span>
                 </div>
               </div>

@@ -141,7 +141,7 @@ export function TomorrowMealSection({
                 <p className="text-sm font-semibold">{t.meals.tomorrowMealsTitle}</p>
                 {isVacationDay && (
                   <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-100 text-blue-700 border border-blue-200">
-                    🏖️ মেস ছুটি
+                    🏖️ {t.meals.vacationLabel}
                   </span>
                 )}
               </div>
@@ -207,7 +207,7 @@ export function TomorrowMealSection({
                     {locked
                       ? cutoffTime
                       : isVacationOff
-                      ? "ছুটি"
+                      ? t.meals.vacationOff
                       : isOn
                       ? t.meals.mealOn
                       : t.meals.mealOff}

@@ -12,10 +12,10 @@ import { getTodayString, formatDate } from "@/lib/utils/date";
 import { addDays } from "@/lib/utils/date-range";
 import type { MessSettings } from "@/lib/types";
 
-const MEALS = [
-  { key: "total_breakfast" as const, emoji: "🌅", label: "সকাল" },
-  { key: "total_lunch" as const, emoji: "☀️", label: "দুপুর" },
-  { key: "total_dinner" as const, emoji: "🌙", label: "রাত" },
+const MEAL_KEYS = [
+  { key: "total_breakfast" as const, emoji: "🌅", tKey: "breakfast" as const },
+  { key: "total_lunch" as const, emoji: "☀️", tKey: "lunch" as const },
+  { key: "total_dinner" as const, emoji: "🌙", tKey: "dinner" as const },
 ];
 
 interface Props {
@@ -134,13 +134,13 @@ export function TomorrowBazaarCard({ messSettings, todaySummary, todayLoading }:
               </div>
             ) : (
               <div className="grid grid-cols-3 gap-2">
-                {MEALS.map(({ key, emoji, label }) => {
+                {MEAL_KEYS.map(({ key, emoji, tKey }) => {
                   const count = tomorrowSummary?.[key] ?? 0;
                   return (
                     <div key={key} className={`rounded-xl p-3 text-center border ${isTomorrowConfirmed ? "bg-green-50 border-green-200" : "bg-muted/40"}`}>
                       <div className="text-xl mb-1">{emoji}</div>
                       <div className="text-lg font-bold">{count}</div>
-                      <div className="text-xs text-muted-foreground">{label}</div>
+                      <div className="text-xs text-muted-foreground">{t.meals[tKey]}</div>
                     </div>
                   );
                 })}
@@ -155,7 +155,7 @@ export function TomorrowBazaarCard({ messSettings, todaySummary, todayLoading }:
               size="sm"
             >
               <ShoppingCart className="h-4 w-4 mr-2" />
-              {t.mealControl.goToBazaar} ({tomorrowTotal} জন)
+              {t.mealControl.goToBazaar} ({tomorrowTotal} {t.meals.personUnit})
               <ArrowRight className="h-3.5 w-3.5 ml-1" />
             </Button>
           )}
@@ -177,21 +177,20 @@ export function TomorrowBazaarCard({ messSettings, todaySummary, todayLoading }:
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-muted/50">
-                    <th className="text-left px-3 py-2 text-xs font-semibold text-muted-foreground">মিল</th>
+                    <th className="text-left px-3 py-2 text-xs font-semibold text-muted-foreground">{t.mealControl.colMeals}</th>
                     <th className="text-center px-3 py-2 text-xs font-semibold text-blue-600">{t.mealControl.today}</th>
                     <th className="text-center px-3 py-2 text-xs font-semibold text-emerald-600">{t.mealControl.tomorrow}</th>
                     <th className="text-center px-3 py-2 text-xs font-semibold text-muted-foreground">±</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {MEALS.map(({ key, emoji, label }) => {
-                    const tKey = key.replace("total_", "") as "breakfast" | "lunch" | "dinner";
+                  {MEAL_KEYS.map(({ key, emoji, tKey }) => {
                     const todayVal = todaySummary?.[`total_${tKey}` as typeof key] ?? 0;
                     const tomorrowVal = tomorrowSummary?.[key] ?? 0;
                     const diff = tomorrowVal - todayVal;
                     return (
                       <tr key={key} className="border-t last:border-b-0">
-                        <td className="px-3 py-2.5 text-xs font-medium">{emoji} {label}</td>
+                        <td className="px-3 py-2.5 text-xs font-medium">{emoji} {t.meals[tKey]}</td>
                         <td className="px-3 py-2.5 text-center text-sm font-bold text-blue-600">{todayVal}</td>
                         <td className="px-3 py-2.5 text-center text-sm font-bold text-emerald-600">{tomorrowVal}</td>
                         <td className={`px-3 py-2.5 text-center text-xs font-semibold ${diff > 0 ? "text-green-600" : diff < 0 ? "text-red-500" : "text-muted-foreground"}`}>
@@ -201,7 +200,7 @@ export function TomorrowBazaarCard({ messSettings, todaySummary, todayLoading }:
                     );
                   })}
                   <tr className="border-t bg-muted/30">
-                    <td className="px-3 py-2 text-xs font-semibold">মোট</td>
+                    <td className="px-3 py-2 text-xs font-semibold">{t.mealControl.total}</td>
                     <td className="px-3 py-2 text-center text-sm font-bold text-blue-600">{todayTotal}</td>
                     <td className="px-3 py-2 text-center text-sm font-bold text-emerald-600">{tomorrowTotal}</td>
                     <td className={`px-3 py-2 text-center text-xs font-bold ${tomorrowTotal - todayTotal > 0 ? "text-green-600" : tomorrowTotal - todayTotal < 0 ? "text-red-500" : "text-muted-foreground"}`}>

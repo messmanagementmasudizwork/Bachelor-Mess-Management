@@ -91,7 +91,7 @@ export function MealCalendarTab({ viewMonth, setViewMonth, getMealForDate, isLoa
                 return (
                   <div
                     key={date}
-                    title={isVacation ? "🏖️ মেস ছুটি" : undefined}
+                    title={isVacation ? `🏖️ ${t.meals.vacationLabel}` : undefined}
                     className={cn(
                       "flex flex-col items-center justify-center rounded-xl border transition-all py-1.5",
                       isToday && "border-primary ring-2 ring-primary/20 bg-primary/5",
@@ -153,7 +153,7 @@ export function MealCalendarTab({ viewMonth, setViewMonth, getMealForDate, isLoa
                 { cls: "bg-green-50 border-green-200", label: t.meals.allOn },
                 { cls: "bg-amber-50 border-amber-200", label: t.meals.partialOn },
                 { cls: "bg-red-50 border-red-200",     label: t.meals.allOff },
-                { cls: "bg-blue-50 border-blue-300",   label: "মেস ছুটি 🏖️" },
+                { cls: "bg-blue-50 border-blue-300",   label: `${t.meals.vacationLabel} 🏖️` },
               ].map(({ cls, label }) => (
                 <div key={label} className="flex items-center gap-1 text-[10px] text-muted-foreground">
                   <div className={cn("h-2.5 w-2.5 rounded-sm border", cls)} />
