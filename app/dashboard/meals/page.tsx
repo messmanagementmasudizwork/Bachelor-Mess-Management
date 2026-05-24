@@ -11,7 +11,6 @@ import { TodayHeroSection } from "@/components/meals/TodayHeroSection";
 import { TomorrowMealSection } from "@/components/meals/TomorrowMealSection";
 import { MealCalendarTab } from "@/components/meals/MealCalendarTab";
 import { AccountFrozenBanner } from "@/components/members/AccountFrozenBanner";
-import { VacationBanner } from "@/components/shared/VacationBanner";
 import { checkMealToggleAllowed } from "@/lib/utils/meal-cutoff";
 import { computeViolationStatus } from "@/lib/utils/leave-violation";
 import { useSyncViolationStatus } from "@/lib/hooks/use-reactivation";
@@ -96,8 +95,6 @@ export default function MealsPage() {
 
   return (
     <div className="space-y-4 animate-fade-in">
-
-      <VacationBanner />
 
       {accountStatus !== "active" && myMembership?.id && activeMess?.id && (
         <AccountFrozenBanner
