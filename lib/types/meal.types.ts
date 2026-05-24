@@ -15,6 +15,7 @@ export interface MealEntry extends AuditFields {
   guest_lunch: number;
   guest_dinner: number;
   note: string | null;
+  vacation_id: string | null;
 
   // Joined data
   member?: {

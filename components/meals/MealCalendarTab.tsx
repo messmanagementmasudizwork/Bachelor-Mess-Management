@@ -72,6 +72,7 @@ export function MealCalendarTab({ viewMonth, setViewMonth, getMealForDate, isLoa
                 const allOff = !!meal && !bfOn && !luOn && !diOn;
                 const someOff = !!meal && (!bfOn || !luOn || !diOn) && !allOff;
                 const allOn = !!meal && bfOn && luOn && diOn;
+                const isVacation = allOff && !!meal?.vacation_id;
 
                 if (isBeforeJoining) {
                   return (
@@ -90,10 +91,12 @@ export function MealCalendarTab({ viewMonth, setViewMonth, getMealForDate, isLoa
                 return (
                   <div
                     key={date}
+                    title={isVacation ? "🏖️ মেস ছুটি" : undefined}
                     className={cn(
                       "flex flex-col items-center justify-center rounded-xl border transition-all py-1.5",
                       isToday && "border-primary ring-2 ring-primary/20 bg-primary/5",
-                      !isToday && allOff && "border-red-200 bg-red-50/70",
+                      !isToday && isVacation && "border-blue-300 bg-blue-50/80 dark:border-blue-700 dark:bg-blue-950/40",
+                      !isToday && !isVacation && allOff && "border-red-200 bg-red-50/70",
                       !isToday && someOff && "border-amber-200 bg-amber-50/50",
                       !isToday && allOn && "border-green-200 bg-green-50/40",
                       !isToday && !meal && "border-border/40",
@@ -102,17 +105,27 @@ export function MealCalendarTab({ viewMonth, setViewMonth, getMealForDate, isLoa
                   >
                     <span className={cn(
                       "text-[11px] font-bold leading-none",
-                      isToday ? "text-primary" : allOff ? "text-red-600" : allOn ? "text-green-700" : "text-foreground"
+                      isToday
+                        ? "text-primary"
+                        : isVacation
+                        ? "text-blue-600 dark:text-blue-400"
+                        : allOff
+                        ? "text-red-600"
+                        : allOn
+                        ? "text-green-700"
+                        : "text-foreground"
                     )}>
                       {dayNum}
                     </span>
-                    {meal && (
+                    {isVacation ? (
+                      <span className="text-[10px] mt-0.5 leading-none">🏖️</span>
+                    ) : meal ? (
                       <div className="flex gap-0.5 mt-1">
                         {[bfOn, luOn, diOn].map((on, i) => (
                           <div key={i} className={cn("h-1.5 w-1.5 rounded-full", on ? "bg-green-500" : "bg-red-400")} />
                         ))}
                       </div>
-                    )}
+                    ) : null}
                   </div>
                 );
               })}
@@ -139,7 +152,8 @@ export function MealCalendarTab({ viewMonth, setViewMonth, getMealForDate, isLoa
               {[
                 { cls: "bg-green-50 border-green-200", label: t.meals.allOn },
                 { cls: "bg-amber-50 border-amber-200", label: t.meals.partialOn },
-                { cls: "bg-red-50 border-red-200", label: t.meals.allOff },
+                { cls: "bg-red-50 border-red-200",     label: t.meals.allOff },
+                { cls: "bg-blue-50 border-blue-300",   label: "মেস ছুটি 🏖️" },
               ].map(({ cls, label }) => (
                 <div key={label} className="flex items-center gap-1 text-[10px] text-muted-foreground">
                   <div className={cn("h-2.5 w-2.5 rounded-sm border", cls)} />

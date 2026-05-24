@@ -50,11 +50,13 @@ export function MealMonthSummaryCard({
     const pastAndToday = monthMeals.filter((m) => m.date <= today);
     const future       = monthMeals.filter((m) => m.date > today);
     const count = (list: MealEntry[]) => ({
-      breakfast: list.filter((m) => m.breakfast).length,
-      lunch:     list.filter((m) => m.lunch).length,
-      dinner:    list.filter((m) => m.dinner).length,
-      guest:     list.reduce((s, m) => s + (m.guest_breakfast ?? 0) + (m.guest_lunch ?? 0) + (m.guest_dinner ?? 0), 0),
-      offDays:   list.filter((m) => !m.breakfast && !m.lunch && !m.dinner).length,
+      breakfast:      list.filter((m) => m.breakfast).length,
+      lunch:          list.filter((m) => m.lunch).length,
+      dinner:         list.filter((m) => m.dinner).length,
+      guest:          list.reduce((s, m) => s + (m.guest_breakfast ?? 0) + (m.guest_lunch ?? 0) + (m.guest_dinner ?? 0), 0),
+      offDays:        list.filter((m) => !m.breakfast && !m.lunch && !m.dinner).length,
+      vacationOffDays: list.filter((m) => !m.breakfast && !m.lunch && !m.dinner && !!m.vacation_id).length,
+      manualOffDays:   list.filter((m) => !m.breakfast && !m.lunch && !m.dinner && !m.vacation_id).length,
     });
     const actual  = count(pastAndToday);
     const planned = count(future);
@@ -170,13 +172,23 @@ export function MealMonthSummaryCard({
                   </div>
                 ))}
                 <div className="border-t border-green-200 pt-1 mt-1 space-y-1">
+                  {stats.actual.vacationOffDays > 0 && (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
+                        <span className="text-[10px]">🏖️</span><span>মেস ছুটি</span>
+                      </div>
+                      <span className="text-[11px] font-bold px-1.5 py-0.5 rounded-full text-blue-700 bg-blue-50">
+                        {stats.actual.vacationOffDays}
+                      </span>
+                    </div>
+                  )}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1 text-[11px] text-muted-foreground">
                       <TrendingDown className="h-3 w-3 text-red-400" /><span>{t.meals.offDaysCount}</span>
                     </div>
                     <span className={cn("text-[11px] font-bold px-1.5 py-0.5 rounded-full",
-                      stats.actual.offDays > 0 ? "text-red-700 bg-red-50" : "text-green-700 bg-green-100")}>
-                      {stats.actual.offDays}
+                      stats.actual.manualOffDays > 0 ? "text-red-700 bg-red-50" : "text-green-700 bg-green-100")}>
+                      {stats.actual.manualOffDays}
                     </span>
                   </div>
                   {stats.actual.guest > 0 && (

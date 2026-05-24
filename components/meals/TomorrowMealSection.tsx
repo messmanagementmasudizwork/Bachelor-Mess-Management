@@ -127,6 +127,9 @@ export function TomorrowMealSection({
 
   const guestBusy = isPending || (isGuestPending ?? false);
 
+  const isVacationDay = !!tomorrowMeal?.vacation_id &&
+    !tomorrowMeal.breakfast && !tomorrowMeal.lunch && !tomorrowMeal.dinner;
+
   return (
     <Card className="border shadow-sm">
       <CardHeader className="pb-2 pt-4 px-4">
@@ -134,7 +137,14 @@ export function TomorrowMealSection({
           <div className="flex items-center gap-2">
             <CalendarDays className="h-4 w-4 text-blue-500" />
             <div>
-              <p className="text-sm font-semibold">{t.meals.tomorrowMealsTitle}</p>
+              <div className="flex items-center gap-2">
+                <p className="text-sm font-semibold">{t.meals.tomorrowMealsTitle}</p>
+                {isVacationDay && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-100 text-blue-700 border border-blue-200">
+                    🏖️ মেস ছুটি
+                  </span>
+                )}
+              </div>
               <p className="text-xs text-muted-foreground">{formatDatePref(tomorrow)}</p>
             </div>
           </div>
@@ -154,6 +164,7 @@ export function TomorrowMealSection({
         <div className="grid grid-cols-3 gap-2">
           {mealTypes.map((type) => {
             const isOn = tomorrowMeal ? tomorrowMeal[type.key] : true;
+            const isVacationOff = !isOn && !!tomorrowMeal?.vacation_id;
             const check = checkMealToggleAllowed(type.key, tomorrow, "member", messSettings, joiningDate);
             const locked = !check.allowed;
             const cutoffTime = getCutoffDisplay(type.key, messSettings);
@@ -170,23 +181,37 @@ export function TomorrowMealSection({
                   "flex flex-col items-center gap-1.5 p-3 rounded-2xl border-2 transition-all duration-200 active:scale-95 select-none min-h-[96px] justify-center",
                   locked
                     ? "bg-muted/40 border-border text-muted-foreground cursor-not-allowed opacity-60"
+                    : isVacationOff
+                    ? "bg-blue-50 border-blue-300 text-blue-700 shadow-sm"
                     : isOn
                     ? "bg-green-50 border-green-300 text-green-800 shadow-sm hover:bg-green-100"
                     : "bg-red-50 border-red-300 text-red-700 shadow-sm hover:bg-red-100"
                 )}
               >
-                <span className="text-2xl leading-none select-none">{MEAL_EMOJIS[type.key]}</span>
+                <span className="text-2xl leading-none select-none">
+                  {isVacationOff ? "🏖️" : MEAL_EMOJIS[type.key]}
+                </span>
                 <span className="text-xs font-bold">{type.label}</span>
                 <div className={cn(
                   "flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold",
                   locked
                     ? "bg-muted text-muted-foreground"
+                    : isVacationOff
+                    ? "bg-blue-200 text-blue-800"
                     : isOn ? "bg-green-200 text-green-800" : "bg-red-200 text-red-800"
                 )}>
                   {locked
                     ? <Clock className="h-2.5 w-2.5" />
                     : isOn ? <Check className="h-2.5 w-2.5" /> : <X className="h-2.5 w-2.5" />}
-                  <span>{locked ? cutoffTime : isOn ? t.meals.mealOn : t.meals.mealOff}</span>
+                  <span>
+                    {locked
+                      ? cutoffTime
+                      : isVacationOff
+                      ? "ছুটি"
+                      : isOn
+                      ? t.meals.mealOn
+                      : t.meals.mealOff}
+                  </span>
                 </div>
                 {slotDeadlineMs !== null && (
                   <CountdownBadge deadlineMs={slotDeadlineMs} />
