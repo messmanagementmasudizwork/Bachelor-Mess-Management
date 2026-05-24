@@ -107,7 +107,7 @@ export function MealMonthSummaryCard({
   ] : [];
 
   return (
-    <Card className="border shadow-sm h-full">
+    <Card className="border shadow-sm">
       <CardHeader className="pb-2 pt-4 px-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
