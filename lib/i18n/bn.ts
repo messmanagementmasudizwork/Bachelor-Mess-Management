@@ -134,7 +134,6 @@ const bn = {
     notifications: "নোটিফিকেশন",
     audit: "অ্যাক্টিভিটি লগ",
     permissions: "অনুমতি",
-    administration: "নোটিশ ও ছুটি",
     noticeboard: "নোটিশ ও ছুটি",
     messSettings: "মেস সেটিংস",
     manager: "ম্যানেজার",

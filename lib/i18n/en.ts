@@ -134,7 +134,6 @@ const en = {
     notifications: "Notifications",
     audit: "Activity Log",
     permissions: "Permissions",
-    administration: "Notice & Vacation",
     noticeboard: "Notice & Vacation",
     messSettings: "Mess Settings",
     manager: "Manager",
