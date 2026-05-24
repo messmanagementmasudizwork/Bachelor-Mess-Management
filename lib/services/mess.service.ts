@@ -2,6 +2,7 @@ import { getRequiredClient } from "@/lib/supabase/client";
 import type { CreateMessInput, UpdateMessInput } from "@/lib/types";
 import { generateInviteCode } from "@/lib/utils";
 import { getCurrentMonthString } from "@/lib/utils/date";
+import { vacationService } from "@/lib/services/vacation.service";
 
 export const messService = {
   async createMess(input: CreateMessInput, userId: string) {
@@ -91,12 +92,18 @@ export const messService = {
 
   async joinMess(inviteCode: string, userId: string) {
     const supabase = getRequiredClient();
-    const { data, error } = await supabase.rpc("join_mess_by_invite", {
+    const { data: messId, error } = await supabase.rpc("join_mess_by_invite", {
       p_invite_code: inviteCode.toUpperCase(),
       p_user_id: userId,
     });
     if (error) throw new Error(error.message);
-    return data;
+
+    // Apply any active/upcoming vacations to the new member (fire-and-forget)
+    vacationService
+      .applyVacationsToNewMember(messId, userId)
+      .catch((err) => console.error("[MessService] applyVacationsToNewMember failed:", err));
+
+    return messId;
   },
 
   async getUserMesses(userId: string) {

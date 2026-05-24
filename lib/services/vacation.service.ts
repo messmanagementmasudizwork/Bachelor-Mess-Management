@@ -140,6 +140,34 @@ export const vacationService = {
     await mealService.bulkTurnOffMeals(messId, memberIds, dates, userId, vacation.id);
   },
 
+  /**
+   * Called when a new member joins the mess.
+   * Applies all active + upcoming vacations to that member so their
+   * meal calendar matches existing members.
+   */
+  async applyVacationsToNewMember(messId: string, userId: string): Promise<void> {
+    const supabase = getRequiredClient();
+    const today = new Date().toISOString().split("T")[0]!;
+
+    // Fetch all vacations that haven't ended yet (active + upcoming)
+    const { data: vacations, error } = await supabase
+      .from("mess_vacations")
+      .select("*")
+      .eq("mess_id", messId)
+      .gte("end_date", today);
+
+    if (error || !vacations || vacations.length === 0) return;
+
+    // Get the new member's mess_members record
+    const member = await memberService.getMemberByUserId(messId, userId);
+    if (!member) return;
+
+    for (const vacation of vacations as MessVacation[]) {
+      const dates = getDatesInRange(vacation.start_date, vacation.end_date);
+      await mealService.bulkTurnOffMeals(messId, [member.id], dates, userId, vacation.id);
+    }
+  },
+
   async notifyAllMembers(
     messId: string,
     vacation: MessVacation,
