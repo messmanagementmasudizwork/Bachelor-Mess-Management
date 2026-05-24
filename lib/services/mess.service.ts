@@ -3,6 +3,7 @@ import type { CreateMessInput, UpdateMessInput } from "@/lib/types";
 import { generateInviteCode } from "@/lib/utils";
 import { getCurrentMonthString } from "@/lib/utils/date";
 import { vacationService } from "@/lib/services/vacation.service";
+import { adminNoticeService } from "@/lib/services/admin-notice.service";
 
 export const messService = {
   async createMess(input: CreateMessInput, userId: string) {
@@ -98,10 +99,23 @@ export const messService = {
     });
     if (error) throw new Error(error.message);
 
-    // Apply any active/upcoming vacations to the new member (fire-and-forget)
+    // Fetch mess name for notification titles (non-blocking)
+    const { data: messRow } = await supabase
+      .from("messes")
+      .select("name")
+      .eq("id", messId)
+      .single();
+    const messName: string = messRow?.name ?? "";
+
+    // Apply vacations + send vacation notifications (fire-and-forget)
     vacationService
-      .applyVacationsToNewMember(messId, userId)
+      .applyVacationsToNewMember(messId, userId, messName)
       .catch((err) => console.error("[MessService] applyVacationsToNewMember failed:", err));
+
+    // Send active notice + upcoming meeting notifications (fire-and-forget)
+    adminNoticeService
+      .notifyNewMemberOfNotices(messId, userId)
+      .catch((err) => console.error("[MessService] notifyNewMemberOfNotices failed:", err));
 
     return messId;
   },

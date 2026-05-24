@@ -156,4 +156,55 @@ export const adminNoticeService = {
       .eq("id", noticeId);
     if (error) throw new Error(error.message);
   },
+
+  /**
+   * Called when a new member joins the mess.
+   * Sends notifications for every active notice and upcoming meeting
+   * so the member is aware of current announcements.
+   */
+  async notifyNewMemberOfNotices(messId: string, userId: string): Promise<void> {
+    const supabase = getRequiredClient();
+    const now = new Date();
+
+    const { data: notices } = await supabase
+      .from("admin_notices")
+      .select("*")
+      .eq("mess_id", messId)
+      .eq("is_published", true)
+      .order("created_at", { ascending: false })
+      .limit(50);
+
+    if (!notices || notices.length === 0) return;
+
+    const notifs = (notices as AdminNotice[])
+      .filter((n) => {
+        // Must be published (publish_at passed or null)
+        if (n.publish_at && new Date(n.publish_at) > now) return false;
+        // Must not be expired
+        if (n.expires_at && new Date(n.expires_at) <= now) return false;
+        // Meetings: only include if meeting hasn't happened yet
+        if (n.notice_type === "meeting" && n.meeting_at && new Date(n.meeting_at) <= now) return false;
+        return true;
+      })
+      .map((n) => {
+        const typeLabel = n.notice_type === "meeting" ? "📅 Meeting" : "📢 Notice";
+        return {
+          user_id:    userId,
+          mess_id:    messId,
+          type:       "admin_notice" as const,
+          title:      `${typeLabel}: ${n.title}`,
+          body:       n.body.slice(0, 200),
+          action_url: "/dashboard/notice-vacation",
+          metadata: {
+            notice_id:   n.id,
+            notice_type: n.notice_type,
+            meeting_at:  n.meeting_at ?? null,
+          },
+        };
+      });
+
+    if (notifs.length > 0) {
+      await notificationService.createBulkNotifications(notifs).catch(() => undefined);
+    }
+  },
 };

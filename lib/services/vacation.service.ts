@@ -145,7 +145,7 @@ export const vacationService = {
    * Applies all active + upcoming vacations to that member so their
    * meal calendar matches existing members.
    */
-  async applyVacationsToNewMember(messId: string, userId: string): Promise<void> {
+  async applyVacationsToNewMember(messId: string, userId: string, messName = ""): Promise<void> {
     const supabase = getRequiredClient();
     const today = new Date().toISOString().split("T")[0]!;
 
@@ -162,9 +162,33 @@ export const vacationService = {
     const member = await memberService.getMemberByUserId(messId, userId);
     if (!member) return;
 
+    const notifs: Parameters<typeof notificationService.createBulkNotifications>[0] = [];
+
     for (const vacation of vacations as MessVacation[]) {
+      // Turn off meals
       const dates = getDatesInRange(vacation.start_date, vacation.end_date);
       await mealService.bulkTurnOffMeals(messId, [member.id], dates, userId, vacation.id);
+
+      // Queue vacation notification
+      const startFmt = new Date(vacation.start_date).toLocaleDateString("en-GB", { day: "numeric", month: "long" });
+      const endFmt   = new Date(vacation.end_date).toLocaleDateString("en-GB",   { day: "numeric", month: "long" });
+      notifs.push({
+        user_id:    userId,
+        mess_id:    messId,
+        type:       "vacation_announced" as const,
+        title:      `🏖️ মেস ছুটি — ${messName}`,
+        body:       `${vacation.title}: ${startFmt} — ${endFmt}`,
+        action_url: "/dashboard/notice-vacation",
+        metadata: {
+          vacation_id: vacation.id,
+          start_date:  vacation.start_date,
+          end_date:    vacation.end_date,
+        },
+      });
+    }
+
+    if (notifs.length > 0) {
+      await notificationService.createBulkNotifications(notifs).catch(() => undefined);
     }
   },
 
