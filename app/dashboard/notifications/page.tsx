@@ -7,7 +7,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { formatTimestamp } from "@/lib/utils/date";
 import { useNotifications, useMarkAsRead, useMarkAllAsRead } from "@/lib/hooks/use-notifications";
-import { PushNotificationCard } from "@/components/shared/PushNotificationCard";
 import type { NotificationType } from "@/lib/types";
 import { useLanguage } from "@/lib/hooks/use-language";
 
@@ -58,8 +57,6 @@ export default function NotificationsPage() {
           </Button>
         </div>
       )}
-
-      <PushNotificationCard />
 
       {isLoading ? (
         <div className="space-y-3">
