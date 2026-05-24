@@ -452,86 +452,89 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
 
-      {/* ── 2. Work Information ────────────────────────────────── */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <Briefcase className="h-4 w-4" />
-            {t.settings.workInfo}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={workForm.handleSubmit(onSaveWork)} className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label className="text-xs">{t.settings.company}</Label>
-                <Input {...workForm.register("company")} placeholder={t.settings.companyPlaceholder} />
+      {/* ── 2 & 3. Work Information + Room & Seat Information ──── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Work Information */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Briefcase className="h-4 w-4" />
+              {t.settings.workInfo}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={workForm.handleSubmit(onSaveWork)} className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label className="text-xs">{t.settings.company}</Label>
+                  <Input {...workForm.register("company")} placeholder={t.settings.companyPlaceholder} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">{t.settings.department}</Label>
+                  <Input {...workForm.register("department")} placeholder={t.settings.departmentPlaceholder} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">{t.settings.designation}</Label>
+                  <Input {...workForm.register("designation")} placeholder={t.settings.designationPlaceholder} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">{t.settings.jobJoiningDate}</Label>
+                  <Input type="date" {...workForm.register("job_joining_date")} />
+                </div>
+                <div className="space-y-1.5 sm:col-span-2">
+                  <Label className="text-xs">{t.settings.jobIdCardNo}</Label>
+                  <Input {...workForm.register("job_id_card_no")} placeholder={t.settings.jobIdCardNoPlaceholder} />
+                </div>
               </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs">{t.settings.department}</Label>
-                <Input {...workForm.register("department")} placeholder={t.settings.departmentPlaceholder} />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs">{t.settings.designation}</Label>
-                <Input {...workForm.register("designation")} placeholder={t.settings.designationPlaceholder} />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs">{t.settings.jobJoiningDate}</Label>
-                <Input type="date" {...workForm.register("job_joining_date")} />
-              </div>
-              <div className="space-y-1.5 sm:col-span-2">
-                <Label className="text-xs">{t.settings.jobIdCardNo}</Label>
-                <Input {...workForm.register("job_id_card_no")} placeholder={t.settings.jobIdCardNoPlaceholder} />
-              </div>
-            </div>
-            <Button type="submit" disabled={savingWork} className="gap-1.5">
-              <Save className="h-4 w-4" />
-              {savingWork ? t.saving : t.settings.saveWorkInfo}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+              <Button type="submit" disabled={savingWork} className="gap-1.5">
+                <Save className="h-4 w-4" />
+                {savingWork ? t.saving : t.settings.saveWorkInfo}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
 
-      {/* ── 3. Room & Seat Information ─────────────────────────── */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <Building2 className="h-4 w-4" />
-            {t.settings.roomInfo}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={roomForm.handleSubmit(onSaveRoom)} className="space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-1.5">
-                <Label className="text-xs">{t.settings.building}</Label>
-                <Input {...roomForm.register("building")} placeholder={t.settings.buildingPlaceholder} />
+        {/* Room & Seat Information */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Building2 className="h-4 w-4" />
+              {t.settings.roomInfo}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={roomForm.handleSubmit(onSaveRoom)} className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label className="text-xs">{t.settings.building}</Label>
+                  <Input {...roomForm.register("building")} placeholder={t.settings.buildingPlaceholder} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">{t.settings.floorNumber}</Label>
+                  <Input {...roomForm.register("floor_number")} placeholder={t.settings.floorPlaceholder} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">{t.settings.roomNumber}</Label>
+                  <Input {...roomForm.register("room_number")} placeholder={t.settings.roomPlaceholder} />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">{t.settings.seatNumber}</Label>
+                  <Input
+                    type="number"
+                    min={1}
+                    {...roomForm.register("seat_number", { valueAsNumber: true })}
+                    placeholder="e.g. 5"
+                  />
+                </div>
               </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs">{t.settings.floorNumber}</Label>
-                <Input {...roomForm.register("floor_number")} placeholder={t.settings.floorPlaceholder} />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs">{t.settings.roomNumber}</Label>
-                <Input {...roomForm.register("room_number")} placeholder={t.settings.roomPlaceholder} />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs">{t.settings.seatNumber}</Label>
-                <Input
-                  type="number"
-                  min={1}
-                  {...roomForm.register("seat_number", { valueAsNumber: true })}
-                  placeholder="e.g. 5"
-                />
-              </div>
-            </div>
-            <Button type="submit" disabled={savingRoom || !myMembership?.id} className="gap-1.5">
-              <Save className="h-4 w-4" />
-              {savingRoom ? t.saving : t.settings.saveRoomInfo}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+              <Button type="submit" disabled={savingRoom || !myMembership?.id} className="gap-1.5">
+                <Save className="h-4 w-4" />
+                {savingRoom ? t.saving : t.settings.saveRoomInfo}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* ── 4. Preferences (combined) ──────────────────────────── */}
       <Card>
