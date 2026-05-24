@@ -1,0 +1,115 @@
+-- ============================================================
+-- CRON JOBS (via pg_cron extension)
+-- Migration: 010_cron_jobs.sql
+-- Run these in Supabase SQL editor after enabling pg_cron extension
+-- ============================================================
+
+-- Enable pg_cron extension (run once as superuser)
+-- CREATE EXTENSION IF NOT EXISTS pg_cron;
+-- CREATE EXTENSION IF NOT EXISTS pg_net;
+
+-- ============================================================
+-- 1. Monthly auto-closing cron
+--    Runs at 23:59 on the last day of each month
+--    Closes the month and triggers rotation
+-- ============================================================
+-- SELECT cron.schedule(
+--   'monthly-auto-close',
+--   '59 23 28-31 * *',
+--   $$
+--   SELECT CASE WHEN EXTRACT(DAY FROM (date_trunc('month', now()) + interval '1 month - 1 day')) = EXTRACT(DAY FROM now())
+--   THEN net.http_post(
+--     url := current_setting('app.supabase_url') || '/functions/v1/close-month',
+--     headers := jsonb_build_object('Authorization', 'Bearer ' || current_setting('app.service_role_key')),
+--     body := jsonb_build_object('auto', true)
+--   ) END;
+--   $$
+-- );
+
+-- ============================================================
+-- 2. Daily meal reminder cron
+--    Runs at 07:00 every day — remind members to set their meals
+-- ============================================================
+-- SELECT cron.schedule(
+--   'daily-meal-reminder',
+--   '0 7 * * *',
+--   $$
+--   INSERT INTO notifications (user_id, mess_id, type, title, body, action_url, is_read)
+--   SELECT mm.user_id, mm.mess_id, 'meal_reminder', 'আজকের মিল সেট করুন',
+--          'আজকের সকাল/দুপুর/রাতের মিল এখনো সেট করা হয়নি।', '/dashboard/meals', false
+--   FROM mess_members mm
+--   WHERE mm.status = 'active'
+--     AND mm.user_id NOT IN (
+--       SELECT m.member_id::uuid FROM meals m
+--       WHERE m.date = CURRENT_DATE::text
+--     );
+--   $$
+-- );
+
+-- ============================================================
+-- 3. Due reminder cron (7, 3, 1 days before month end)
+--    Runs daily at 09:00
+-- ============================================================
+-- SELECT cron.schedule(
+--   'due-reminder',
+--   '0 9 * * *',
+--   $$
+--   SELECT net.http_post(
+--     url := current_setting('app.supabase_url') || '/functions/v1/process-due-reminders',
+--     headers := jsonb_build_object('Authorization', 'Bearer ' || current_setting('app.service_role_key')),
+--     body := '{}'::jsonb
+--   );
+--   $$
+-- );
+
+-- ============================================================
+-- 4. Notification cleanup cron (delete read notifs older than 30 days)
+--    Runs at 02:00 every day
+-- ============================================================
+-- SELECT cron.schedule(
+--   'notification-cleanup',
+--   '0 2 * * *',
+--   $$
+--   DELETE FROM notifications
+--   WHERE is_read = true
+--     AND created_at < NOW() - INTERVAL '30 days';
+--   $$
+-- );
+
+-- ============================================================
+-- 5. Inventory low-stock check cron
+--    Runs every day at 08:00 — creates notification if stock < min_stock
+-- ============================================================
+-- SELECT cron.schedule(
+--   'inventory-low-stock-check',
+--   '0 8 * * *',
+--   $$
+--   INSERT INTO notifications (user_id, mess_id, type, title, body, action_url, is_read)
+--   SELECT DISTINCT mm.user_id, i.mess_id, 'inventory', 'ইনভেন্টরি কম আছে',
+--          i.item_name || ' এর স্টক কম হয়ে গেছে।', '/dashboard/inventory', false
+--   FROM inventory i
+--   JOIN mess_members mm ON mm.mess_id = i.mess_id
+--     AND mm.role IN ('owner', 'admin', 'manager')
+--     AND mm.status = 'active'
+--   WHERE i.quantity <= COALESCE(i.min_quantity, 0)
+--     AND i.min_quantity IS NOT NULL;
+--   $$
+-- );
+
+-- ============================================================
+-- 6. Analytics refresh cron (refresh materialized views if any)
+--    Runs at 03:00 every day
+-- ============================================================
+-- SELECT cron.schedule(
+--   'analytics-refresh',
+--   '0 3 * * *',
+--   $$
+--   -- REFRESH MATERIALIZED VIEW CONCURRENTLY monthly_analytics_mv;
+--   SELECT 1; -- placeholder
+--   $$
+-- );
+
+-- ============================================================
+-- To list all cron jobs:   SELECT * FROM cron.job;
+-- To unschedule a job:     SELECT cron.unschedule('job-name');
+-- ============================================================

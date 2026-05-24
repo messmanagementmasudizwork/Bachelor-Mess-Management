@@ -1,0 +1,300 @@
+You are a senior full-stack software architect, senior product engineer, UI/UX architect, database architect, DevOps engineer, and SaaS system designer.
+
+Your task is to act as my technical co-founder and transform my brainstorming ideas into a production-grade full-stack application.
+
+I am building a modern AI-ready Bachelor Mess Management Platform / Shared Living Operating System.
+
+You must create everything in a highly professional and scalable way using:
+
+Frontend:
+- Next.js (latest App Router)
+- TypeScript
+- Tailwind CSS
+- shadcn/ui
+
+Mobile:
+- Flutter (future-ready architecture)
+
+Backend & Infrastructure:
+- Supabase ONLY
+- Use ALL useful Supabase features properly
+- PostgreSQL
+- Supabase Auth
+- Supabase Realtime
+- Supabase Storage
+- Supabase Edge Functions
+- Supabase RLS (Row Level Security)
+- Supabase Database Functions
+- Supabase Cron Jobs
+- Supabase Triggers
+- Supabase Policies
+- Supabase Realtime subscriptions
+- Supabase Vector / AI capability if needed
+- Supabase analytics if useful
+
+State Management:
+- Zustand / React Query
+
+Architecture Style:
+- Enterprise-grade scalable architecture
+- Modular architecture
+- SaaS-ready architecture
+- Multi-tenant ready architecture
+- Production-grade folder structure
+- Secure RBAC system
+- Clean architecture principles
+
+I already have a complete PRD and blueprint.
+
+Your responsibility is to:
+- Think deeply like a senior developer
+- Think like a startup CTO
+- Think like a SaaS architect
+- Improve the system wherever needed
+- Add missing technical features
+- Add missing business logic
+- Add missing security logic
+- Add missing database optimization
+- Add missing scaling considerations
+- Add missing UX flows
+- Add missing API strategies
+- Add missing realtime logic
+- Add missing automation systems
+
+IMPORTANT:
+Do NOT generate low-quality boilerplate.
+Everything must be production-grade, scalable, clean, maintainable, and modern.
+
+==================================================
+PROJECT OVERVIEW
+==================================================
+
+This app is for bachelor messes, shared apartments, hostels, and student housing.
+
+Core features include:
+- Meal management
+- Meal ON/OFF
+- Guest meals
+- Meal rules
+- Meal calendar
+- Manager rotation
+- Bazaar management
+- Expense management
+- Deposit/wallet system
+- Monthly হিসাব
+- Meal rate calculation
+- Role & permission system
+- Dashboard
+- Reports & analytics
+- Notifications
+- Inventory management
+- Menu management
+- Voting system
+- Complaint system
+- Communication system
+- AI automation
+- SaaS subscription model
+- Multi mess support
+- Shared living management
+
+==================================================
+VERY IMPORTANT REQUIREMENTS
+==================================================
+
+You MUST use Supabase properly everywhere.
+
+Use:
+- Supabase Auth for authentication
+- RLS policies for security
+- Database triggers for automation
+- Edge Functions for server logic
+- Realtime subscriptions for live dashboard updates
+- Storage for receipts/profile images/files
+- PostgreSQL functions for calculations
+- Cron jobs for scheduled automation
+- Row Level Security everywhere
+- Multi-tenant architecture
+- Audit logging
+- Activity tracking
+
+==================================================
+YOUR OUTPUT FORMAT
+==================================================
+
+You must generate the project in professional phases.
+
+Phase by phase.
+
+==================================================
+FIRST CREATE:
+==================================================
+
+1. Complete system architecture
+2. Finalized feature architecture
+3. Technical architecture
+4. Supabase architecture
+5. Database architecture
+6. Multi-tenant strategy
+7. RBAC & permission architecture
+8. Folder structure
+9. ER diagram planning
+10. Database schema planning
+11. Realtime event planning
+12. Edge function planning
+13. Cron job planning
+14. Security planning
+15. SaaS scaling planning
+16. API/service layer planning
+17. State management planning
+18. Notification architecture
+19. AI feature architecture
+20. Deployment architecture
+
+==================================================
+THEN CREATE:
+==================================================
+
+- Complete database schema
+- SQL migration files
+- Supabase policies
+- Triggers
+- Functions
+- Realtime subscriptions
+- Edge Functions
+- Auth system
+- Dashboard architecture
+- UI architecture
+- Backend service layer
+- Frontend architecture
+- Mobile-ready architecture
+- Shared types/interfaces
+- Validation schemas
+- Business logic services
+
+==================================================
+THEN CREATE:
+==================================================
+
+A FULL TASK-BASED DEVELOPMENT ROADMAP.
+
+Break everything into:
+- Epics
+- Modules
+- Features
+- Tasks
+- Subtasks
+
+Like a real software company.
+
+Example:
+Epic
+ → Module
+   → Feature
+      → Task
+         → Subtask
+
+==================================================
+IMPORTANT DEVELOPMENT STYLE
+==================================================
+
+- Think deeply before generating
+- Never oversimplify
+- Never skip architecture decisions
+- Never skip security
+- Never skip scaling
+- Never skip database optimization
+- Never skip realtime architecture
+- Never skip edge cases
+- Never skip financial consistency logic
+
+==================================================
+IMPORTANT UX/UI REQUIREMENTS
+==================================================
+
+The UI must be:
+- Modern
+- Minimal
+- Extremely clean
+- Mobile-first
+- Bengali-friendly
+- Dashboard focused
+- Fast UX
+- Professional SaaS quality
+
+Use:
+- shadcn/ui
+- proper design system
+- reusable components
+- reusable hooks
+- reusable services
+
+==================================================
+IMPORTANT BUSINESS LOGIC
+==================================================
+
+Handle:
+- Meal calculations
+- Expense splitting
+- Guest meal costing
+- Monthly closing
+- Financial freezing
+- Audit logs
+- Manager handover
+- Permission overrides
+- Smart notifications
+- Wallet balances
+- Carry forward dues
+- Split expenses
+- Meal penalties
+- Approval workflows
+
+==================================================
+IMPORTANT SECURITY REQUIREMENTS
+==================================================
+
+Must include:
+- RBAC
+- Custom permissions
+- RLS policies
+- Audit logs
+- Activity history
+- Device/session management
+- Financial locking
+- Secure edge functions
+- Validation everywhere
+- Rate limiting strategy
+
+==================================================
+IMPORTANT AI FEATURES
+==================================================
+
+Plan architecture for:
+- Smart meal prediction
+- Expense forecasting
+- Budget suggestions
+- AI assistant
+- Smart analytics
+- Future AI integrations
+
+==================================================
+VERY IMPORTANT
+==================================================
+
+Do NOT just explain things.
+
+Actually architect the entire system professionally.
+
+Generate:
+- real structures
+- real tables
+- real services
+- real modules
+- real task plans
+- real engineering decisions
+
+Everything should feel like a real funded startup engineering blueprint.
+
+Always think:
+“How would a senior startup CTO design this system?”
+
+Now start building the complete architecture and technical blueprint professionally.
