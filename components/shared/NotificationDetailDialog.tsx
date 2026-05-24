@@ -7,26 +7,27 @@ import { cn } from "@/lib/utils";
 import type { Notification } from "@/lib/types/notification.types";
 import { useAdminNoticeById } from "@/lib/hooks/use-admin-notices";
 import { useVacationById } from "@/lib/hooks/use-vacation";
+import { useLanguage } from "@/lib/hooks/use-language";
 import type { AdminNotice } from "@/lib/services/admin-notice.service";
 import type { MessVacation } from "@/lib/services/vacation.service";
 
 /* ── date helpers ──────────────────────────────────────────────────────── */
 
-function fmtDate(d: string) {
-  return new Date(d).toLocaleDateString("en-GB", {
+function fmtDate(d: string, locale: string) {
+  return new Date(d).toLocaleDateString(locale, {
     weekday: "long", day: "numeric", month: "long", year: "numeric",
   });
 }
-function fmtDateShort(d: string) {
-  return new Date(d).toLocaleDateString("en-GB", {
+function fmtDateShort(d: string, locale: string) {
+  return new Date(d).toLocaleDateString(locale, {
     day: "numeric", month: "long", year: "numeric",
   });
 }
-function fmtTime(d: string) {
-  return new Date(d).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+function fmtTime(d: string, locale: string) {
+  return new Date(d).toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit" });
 }
-function fmtFull(d: string) {
-  return new Date(d).toLocaleDateString("en-GB", {
+function fmtFull(d: string, locale: string) {
+  return new Date(d).toLocaleDateString(locale, {
     day: "numeric", month: "long", year: "numeric",
     hour: "2-digit", minute: "2-digit",
   });
@@ -45,6 +46,18 @@ function isToday(d: string) {
   const t = new Date().toISOString().split("T")[0]!;
   return d.startsWith(t);
 }
+
+/* ── translation dict type ─────────────────────────────────────────────── */
+type DetailT = {
+  postedBy: string; published: string; expires: string; received: string;
+  meetingDate: string; meetingTime: string; organizedBy: string;
+  noticeExpires: string; notified: string; announced: string;
+  startDate: string; endDate: string; totalDays: string;
+  mealStatus: string; mealsStopped: string; messReopens: string;
+  reason: string; days: string;
+  statusDone: string; statusToday: string; statusUpcoming: string;
+  statusOngoing: string; statusEnded: string;
+};
 
 /* ── shared detail row ─────────────────────────────────────────────────── */
 function Row({ icon, label, value, valueClass }: {
@@ -75,8 +88,9 @@ function LoadingSkeleton() {
 }
 
 /* ── NOTICE content ────────────────────────────────────────────────────── */
-function NoticeContent({ notification, notice, isLoading }: {
+function NoticeContent({ notification, notice, isLoading, d, locale }: {
   notification: Notification; notice: AdminNotice | null; isLoading: boolean;
+  d: DetailT; locale: string;
 }) {
   const title = notice?.title ?? notification.title.replace(/^📢 Notice:\s*/i, "").replace(/^📢 বিজ্ঞপ্তি:\s*/i, "");
   const body  = notice?.body  ?? notification.body;
@@ -105,27 +119,27 @@ function NoticeContent({ notification, notice, isLoading }: {
               {notice?.creator_name && (
                 <Row
                   icon={<User className="h-4 w-4" />}
-                  label="Posted by"
+                  label={d.postedBy}
                   value={notice.creator_name}
                 />
               )}
               <Row
                 icon={<Calendar className="h-4 w-4" />}
-                label="Published"
-                value={notice?.publish_at ? fmtDateShort(notice.publish_at) : fmtDateShort(notification.created_at)}
+                label={d.published}
+                value={notice?.publish_at ? fmtDateShort(notice.publish_at, locale) : fmtDateShort(notification.created_at, locale)}
               />
               {notice?.expires_at && (
                 <Row
                   icon={<Clock className="h-4 w-4" />}
-                  label="Expires"
-                  value={fmtDateShort(notice.expires_at)}
+                  label={d.expires}
+                  value={fmtDateShort(notice.expires_at, locale)}
                   valueClass={isPast(notice.expires_at) ? "text-destructive" : "text-orange-600"}
                 />
               )}
               <Row
                 icon={<Clock className="h-4 w-4" />}
-                label="Received"
-                value={fmtFull(notification.created_at)}
+                label={d.received}
+                value={fmtFull(notification.created_at, locale)}
               />
             </div>
           )}
@@ -136,21 +150,22 @@ function NoticeContent({ notification, notice, isLoading }: {
 }
 
 /* ── MEETING content ───────────────────────────────────────────────────── */
-function MeetingContent({ notification, notice, isLoading }: {
+function MeetingContent({ notification, notice, isLoading, d, locale }: {
   notification: Notification; notice: AdminNotice | null; isLoading: boolean;
+  d: DetailT; locale: string;
 }) {
-  const title    = notice?.title ?? notification.title.replace(/^📅 Meeting:\s*/i, "").replace(/^📅 সভা:\s*/i, "");
-  const body     = notice?.body  ?? notification.body;
+  const title     = notice?.title ?? notification.title.replace(/^📅 Meeting:\s*/i, "").replace(/^📅 সভা:\s*/i, "");
+  const body      = notice?.body  ?? notification.body;
   const meetingAt = (notice?.meeting_at ?? notification.metadata?.meeting_at) as string | null | undefined;
 
   let statusBadge: React.ReactNode = null;
   if (meetingAt) {
     if (isPast(meetingAt)) {
-      statusBadge = <Badge variant="secondary">সম্পন্ন</Badge>;
+      statusBadge = <Badge variant="secondary">{d.statusDone}</Badge>;
     } else if (isToday(meetingAt)) {
-      statusBadge = <Badge className="bg-green-100 text-green-700 border-green-200">আজ</Badge>;
+      statusBadge = <Badge className="bg-green-100 text-green-700 border-green-200">{d.statusToday}</Badge>;
     } else {
-      statusBadge = <Badge className="bg-blue-100 text-blue-700 border-blue-200">আসন্ন</Badge>;
+      statusBadge = <Badge className="bg-blue-100 text-blue-700 border-blue-200">{d.statusUpcoming}</Badge>;
     }
   }
 
@@ -182,13 +197,13 @@ function MeetingContent({ notification, notice, isLoading }: {
                 <>
                   <Row
                     icon={<Calendar className="h-4 w-4" />}
-                    label="Meeting Date"
-                    value={fmtDate(meetingAt)}
+                    label={d.meetingDate}
+                    value={fmtDate(meetingAt, locale)}
                   />
                   <Row
                     icon={<Clock className="h-4 w-4" />}
-                    label="Meeting Time"
-                    value={fmtTime(meetingAt)}
+                    label={d.meetingTime}
+                    value={fmtTime(meetingAt, locale)}
                     valueClass="text-primary font-semibold"
                   />
                 </>
@@ -196,22 +211,22 @@ function MeetingContent({ notification, notice, isLoading }: {
               {notice?.creator_name && (
                 <Row
                   icon={<User className="h-4 w-4" />}
-                  label="Organized by"
+                  label={d.organizedBy}
                   value={notice.creator_name}
                 />
               )}
               {notice?.expires_at && (
                 <Row
                   icon={<AlertCircle className="h-4 w-4" />}
-                  label="Notice Expires"
-                  value={fmtDateShort(notice.expires_at)}
+                  label={d.noticeExpires}
+                  value={fmtDateShort(notice.expires_at, locale)}
                   valueClass={isPast(notice.expires_at) ? "text-destructive" : "text-orange-600"}
                 />
               )}
               <Row
                 icon={<Clock className="h-4 w-4" />}
-                label="Notified"
-                value={fmtFull(notification.created_at)}
+                label={d.notified}
+                value={fmtFull(notification.created_at, locale)}
               />
             </div>
           )}
@@ -222,8 +237,9 @@ function MeetingContent({ notification, notice, isLoading }: {
 }
 
 /* ── VACATION content ──────────────────────────────────────────────────── */
-function VacationContent({ notification, vacation, isLoading }: {
+function VacationContent({ notification, vacation, isLoading, d, locale }: {
   notification: Notification; vacation: MessVacation | null; isLoading: boolean;
+  d: DetailT; locale: string;
 }) {
   const meta      = notification.metadata as Record<string, string> | null;
   const startDate = vacation?.start_date ?? meta?.start_date;
@@ -235,11 +251,11 @@ function VacationContent({ notification, vacation, isLoading }: {
   if (startDate && endDate) {
     const today = new Date().toISOString().split("T")[0]!;
     if (today < startDate) {
-      statusBadge = <Badge className="bg-blue-100 text-blue-700 border-blue-200">আসন্ন</Badge>;
+      statusBadge = <Badge className="bg-blue-100 text-blue-700 border-blue-200">{d.statusUpcoming}</Badge>;
     } else if (today > endDate) {
-      statusBadge = <Badge variant="secondary">শেষ হয়েছে</Badge>;
+      statusBadge = <Badge variant="secondary">{d.statusEnded}</Badge>;
     } else {
-      statusBadge = <Badge className="bg-amber-100 text-amber-700 border-amber-200">চলমান</Badge>;
+      statusBadge = <Badge className="bg-amber-100 text-amber-700 border-amber-200">{d.statusOngoing}</Badge>;
     }
   }
 
@@ -269,50 +285,50 @@ function VacationContent({ notification, vacation, isLoading }: {
               {startDate && (
                 <Row
                   icon={<Calendar className="h-4 w-4" />}
-                  label="শুরু"
-                  value={fmtDateShort(startDate)}
+                  label={d.startDate}
+                  value={fmtDateShort(startDate, locale)}
                 />
               )}
               {endDate && (
                 <Row
                   icon={<Calendar className="h-4 w-4" />}
-                  label="শেষ"
-                  value={fmtDateShort(endDate)}
+                  label={d.endDate}
+                  value={fmtDateShort(endDate, locale)}
                 />
               )}
               {days !== null && (
                 <Row
                   icon={<Clock className="h-4 w-4" />}
-                  label="মোট ছুটি"
-                  value={`${days} দিন`}
+                  label={d.totalDays}
+                  value={`${days} ${d.days}`}
                   valueClass="text-amber-700 font-semibold"
                 />
               )}
               <Row
                 icon={<UtensilsCrossed className="h-4 w-4" />}
-                label="মিল স্ট্যাটাস"
-                value="ছুটির সময় সব মিল বন্ধ"
+                label={d.mealStatus}
+                value={d.mealsStopped}
                 valueClass="text-destructive"
               />
               {reopens && (
                 <Row
                   icon={<RotateCcw className="h-4 w-4" />}
-                  label="মেস চালু"
-                  value={fmtDateShort(reopens)}
+                  label={d.messReopens}
+                  value={fmtDateShort(reopens, locale)}
                   valueClass="text-green-600 font-semibold"
                 />
               )}
               {reason && (
                 <Row
                   icon={<AlertCircle className="h-4 w-4" />}
-                  label="কারণ"
+                  label={d.reason}
                   value={reason}
                 />
               )}
               <Row
                 icon={<Clock className="h-4 w-4" />}
-                label="ঘোষণা"
-                value={fmtFull(notification.created_at)}
+                label={d.announced}
+                value={fmtFull(notification.created_at, locale)}
               />
             </div>
           )}
@@ -338,7 +354,7 @@ const NOTIF_COLOR: Record<string, string> = {
   rule_violation:    "bg-amber-100",   system:            "bg-gray-100",
 };
 
-function GenericContent({ notification }: { notification: Notification }) {
+function GenericContent({ notification, locale }: { notification: Notification; locale: string }) {
   const icon  = NOTIF_ICON[notification.type]  ?? "🔔";
   const color = NOTIF_COLOR[notification.type] ?? "bg-gray-100";
   return (
@@ -359,7 +375,7 @@ function GenericContent({ notification }: { notification: Notification }) {
             {notification.body}
           </p>
           <p className="text-xs text-muted-foreground text-center">
-            🕐 {fmtFull(notification.created_at)}
+            🕐 {fmtFull(notification.created_at, locale)}
           </p>
         </div>
       </DialogDescription>
@@ -374,6 +390,10 @@ interface Props {
 }
 
 export function NotificationDetailDialog({ notification, onClose }: Props) {
+  const { t, lang } = useLanguage();
+  const locale      = lang === "bn" ? "bn-BD" : "en-GB";
+  const d           = t.notifications.detail as DetailT;
+
   const noticeId   = notification?.type === "admin_notice"
     ? (notification.metadata?.notice_id as string | undefined)
     : undefined;
@@ -393,14 +413,14 @@ export function NotificationDetailDialog({ notification, onClose }: Props) {
   function renderContent() {
     if (notification!.type === "admin_notice") {
       if (noticeSubType === "meeting") {
-        return <MeetingContent notification={notification!} notice={notice ?? null} isLoading={noticeLoading} />;
+        return <MeetingContent notification={notification!} notice={notice ?? null} isLoading={noticeLoading} d={d} locale={locale} />;
       }
-      return <NoticeContent notification={notification!} notice={notice ?? null} isLoading={noticeLoading} />;
+      return <NoticeContent notification={notification!} notice={notice ?? null} isLoading={noticeLoading} d={d} locale={locale} />;
     }
     if (notification!.type === "vacation_announced") {
-      return <VacationContent notification={notification!} vacation={vacation ?? null} isLoading={vacationLoading} />;
+      return <VacationContent notification={notification!} vacation={vacation ?? null} isLoading={vacationLoading} d={d} locale={locale} />;
     }
-    return <GenericContent notification={notification!} />;
+    return <GenericContent notification={notification!} locale={locale} />;
   }
 
   return (
