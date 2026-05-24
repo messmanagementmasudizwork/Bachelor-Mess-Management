@@ -12,6 +12,7 @@ export const ADMIN_NOTICE_KEYS = {
   all:    ["admin_notices"] as const,
   list:   (messId: string) => [...ADMIN_NOTICE_KEYS.all, "list",   messId] as const,
   active: (messId: string) => [...ADMIN_NOTICE_KEYS.all, "active", messId] as const,
+  byId:   (id: string)     => [...ADMIN_NOTICE_KEYS.all, "byId",   id]     as const,
 };
 
 export function useAdminNotices() {
@@ -56,6 +57,15 @@ export function useCreateAdminNotice() {
       toast.success("Notice published!");
     },
     onError: (error: Error) => toast.error(error.message),
+  });
+}
+
+export function useAdminNoticeById(noticeId: string | undefined) {
+  return useQuery({
+    queryKey: ADMIN_NOTICE_KEYS.byId(noticeId ?? ""),
+    queryFn:  () => adminNoticeService.getNoticeById(noticeId!),
+    enabled:  !!noticeId,
+    staleTime: 5 * 60_000,
   });
 }
 

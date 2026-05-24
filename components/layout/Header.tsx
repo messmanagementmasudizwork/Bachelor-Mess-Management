@@ -3,7 +3,7 @@ import { useState } from "react";
 import {
   Bell, Menu, LogOut, Settings, CheckCheck,
   UtensilsCrossed, Receipt, Wallet, Users, AlertTriangle,
-  Plane, Megaphone, UserCog, Calendar, Shield, ChevronRight, ExternalLink,
+  Plane, Megaphone, UserCog, Calendar, Shield, ChevronRight,
 } from "lucide-react";
 import { useUIStore } from "@/lib/stores/ui.store";
 import { useMessStore } from "@/lib/stores/mess.store";
@@ -13,9 +13,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
-} from "@/components/ui/dialog";
+import { NotificationDetailDialog } from "@/components/shared/NotificationDetailDialog";
 import { useAuth } from "@/lib/hooks/use-auth";
 import {
   useUnreadCount, useNotifications, useMarkAsRead, useMarkAllAsRead,
@@ -25,7 +23,7 @@ import { useAllActiveAdminNotices } from "@/lib/hooks/use-admin-notices";
 import { getInitials } from "@/lib/utils";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useLanguage } from "@/lib/hooks/use-language";
 import { getPageTitleKeys } from "./nav.config";
 import type { Notification, NotificationType } from "@/lib/types/notification.types";
@@ -59,13 +57,6 @@ function relativeTime(dateStr: string): string {
   const d = Math.floor(h / 24);
   if (d < 7)  return `${d}d ago`;
   return new Date(dateStr).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
-}
-
-function fullTimestamp(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString("en-GB", {
-    day: "numeric", month: "long", year: "numeric",
-    hour: "2-digit", minute: "2-digit",
-  });
 }
 
 function notifIcon(type: NotificationType, size: "sm" | "lg" = "sm") {
@@ -119,7 +110,6 @@ export function Header() {
   const { data: vacation } = useActiveVacation();
   const { data: notices = [] } = useAllActiveAdminNotices();
   const pathname = usePathname();
-  const router   = useRouter();
   const { t, lang } = useLanguage();
   const dateLocale = lang === "bn" ? "bn-BD" : "en-GB";
 
@@ -351,56 +341,10 @@ export function Header() {
         </div>
       </header>
 
-      {/* ── Notification detail dialog ─────────────────────────────────── */}
-      <Dialog open={!!selectedNotif} onOpenChange={(open) => { if (!open) setSelectedNotif(null); }}>
-        {selectedNotif && (
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              {/* Large icon */}
-              <div className="flex justify-center mb-4">
-                <div className={cn(
-                  "flex h-16 w-16 items-center justify-center rounded-2xl",
-                  notifIconBg(selectedNotif.type)
-                )}>
-                  {notifIcon(selectedNotif.type, "lg")}
-                </div>
-              </div>
-
-              <DialogTitle className="text-center text-base font-semibold leading-snug">
-                {selectedNotif.title}
-              </DialogTitle>
-            </DialogHeader>
-
-            {/* Body */}
-            <DialogDescription asChild>
-              <div className="space-y-4">
-                <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap text-center">
-                  {selectedNotif.body}
-                </p>
-
-                {/* Timestamp */}
-                <p className="text-xs text-muted-foreground text-center">
-                  🕐 {fullTimestamp(selectedNotif.created_at)}
-                </p>
-
-                {/* Action button */}
-                {selectedNotif.action_url && (
-                  <Button
-                    className="w-full gap-2"
-                    onClick={() => {
-                      setSelectedNotif(null);
-                      router.push(selectedNotif.action_url!);
-                    }}
-                  >
-                    View Details
-                    <ExternalLink className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            </DialogDescription>
-          </DialogContent>
-        )}
-      </Dialog>
+      <NotificationDetailDialog
+        notification={selectedNotif}
+        onClose={() => setSelectedNotif(null)}
+      />
     </>
   );
 }

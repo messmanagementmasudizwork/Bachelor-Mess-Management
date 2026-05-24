@@ -39,6 +39,19 @@ function isNoticeVisible(n: AdminNotice, now: Date): boolean {
 }
 
 export const adminNoticeService = {
+  /** Single notice by ID */
+  async getNoticeById(noticeId: string): Promise<AdminNotice | null> {
+    const supabase = getRequiredClient();
+    const { data, error } = await supabase
+      .from("admin_notices")
+      .select("*, profiles!admin_notices_created_by_fkey(full_name)")
+      .eq("id", noticeId)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!data) return null;
+    return { ...(data as any), creator_name: (data as any).profiles?.full_name ?? null };
+  },
+
   /** All published notices for the admin panel list (shows scheduled too) */
   async getNotices(messId: string): Promise<AdminNotice[]> {
     const supabase = getRequiredClient();
@@ -119,6 +132,11 @@ export const adminNoticeService = {
               title:      `${typeLabel}: ${input.title}`,
               body:       input.body.slice(0, 200),
               action_url: "/dashboard/administration",
+              metadata: {
+                notice_id:   data.id,
+                notice_type: input.notice_type,
+                meeting_at:  input.meeting_at ?? null,
+              },
             }))
           );
         }

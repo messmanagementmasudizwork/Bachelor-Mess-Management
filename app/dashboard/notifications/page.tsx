@@ -1,20 +1,17 @@
 "use client";
 import { useState } from "react";
-import { Bell, CheckCheck, Check, ExternalLink } from "lucide-react";
+import { Bell, CheckCheck, Check } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
-} from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { formatTimestamp } from "@/lib/utils/date";
 import { useNotifications, useMarkAsRead, useMarkAllAsRead } from "@/lib/hooks/use-notifications";
+import { NotificationDetailDialog } from "@/components/shared/NotificationDetailDialog";
 import type { NotificationType } from "@/lib/types";
 import type { Notification } from "@/lib/types/notification.types";
 import { useLanguage } from "@/lib/hooks/use-language";
-import { useRouter } from "next/navigation";
 
 const notificationTypeConfig: Record<NotificationType | "default", { icon: string; color: string }> = {
   expense_added:        { icon: "🛒", color: "bg-orange-100 text-orange-700" },
@@ -29,22 +26,15 @@ const notificationTypeConfig: Record<NotificationType | "default", { icon: strin
   low_balance:          { icon: "📉", color: "bg-rose-100 text-rose-700" },
   rule_violation:       { icon: "🚫", color: "bg-amber-100 text-amber-700" },
   vacation_announced:   { icon: "🏖️", color: "bg-amber-100 text-amber-700" },
+  admin_notice:         { icon: "📢", color: "bg-purple-100 text-purple-700" },
   system:               { icon: "🔔", color: "bg-gray-100 text-gray-700" },
   default:              { icon: "🔔", color: "bg-gray-100 text-gray-700" },
 };
 
-function fullTimestamp(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString("en-GB", {
-    day: "numeric", month: "long", year: "numeric",
-    hour: "2-digit", minute: "2-digit",
-  });
-}
-
 export default function NotificationsPage() {
   const { t } = useLanguage();
-  const router = useRouter();
   const { data: notifications, isLoading } = useNotifications();
-  const markAsRead = useMarkAsRead();
+  const markAsRead    = useMarkAsRead();
   const markAllAsRead = useMarkAllAsRead();
 
   const [selectedNotif, setSelectedNotif] = useState<Notification | null>(null);
@@ -118,12 +108,7 @@ export default function NotificationsPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
-                      <p
-                        className={cn(
-                          "text-sm font-semibold",
-                          !notification.is_read && "text-primary"
-                        )}
-                      >
+                      <p className={cn("text-sm font-semibold", !notification.is_read && "text-primary")}>
                         {notification.title}
                       </p>
                       {!notification.is_read ? (
@@ -146,51 +131,10 @@ export default function NotificationsPage() {
         </div>
       )}
 
-      {/* Notification detail dialog */}
-      <Dialog open={!!selectedNotif} onOpenChange={(open) => { if (!open) setSelectedNotif(null); }}>
-        {selectedNotif && (
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <div className="flex justify-center mb-4">
-                <div className={cn(
-                  "flex h-16 w-16 items-center justify-center rounded-2xl text-3xl",
-                  (notificationTypeConfig[selectedNotif.type as NotificationType] ?? notificationTypeConfig.default).color
-                )}>
-                  {(notificationTypeConfig[selectedNotif.type as NotificationType] ?? notificationTypeConfig.default).icon}
-                </div>
-              </div>
-              <DialogTitle className="text-center text-base font-semibold leading-snug">
-                {selectedNotif.title}
-              </DialogTitle>
-            </DialogHeader>
-
-            <DialogDescription asChild>
-              <div className="space-y-4">
-                <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap text-center">
-                  {selectedNotif.body}
-                </p>
-
-                <p className="text-xs text-muted-foreground text-center">
-                  🕐 {fullTimestamp(selectedNotif.created_at)}
-                </p>
-
-                {selectedNotif.action_url && (
-                  <Button
-                    className="w-full gap-2"
-                    onClick={() => {
-                      setSelectedNotif(null);
-                      router.push(selectedNotif.action_url!);
-                    }}
-                  >
-                    View Details
-                    <ExternalLink className="h-4 w-4" />
-                  </Button>
-                )}
-              </div>
-            </DialogDescription>
-          </DialogContent>
-        )}
-      </Dialog>
+      <NotificationDetailDialog
+        notification={selectedNotif}
+        onClose={() => setSelectedNotif(null)}
+      />
     </div>
   );
 }

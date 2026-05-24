@@ -24,6 +24,17 @@ export interface CreateVacationInput {
 }
 
 export const vacationService = {
+  async getVacationById(vacationId: string): Promise<MessVacation | null> {
+    const supabase = getRequiredClient();
+    const { data, error } = await supabase
+      .from("mess_vacations")
+      .select("*")
+      .eq("id", vacationId)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    return data ?? null;
+  },
+
   async getVacations(messId: string): Promise<MessVacation[]> {
     const supabase = getRequiredClient();
     const { data, error } = await supabase

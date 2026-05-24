@@ -9,6 +9,7 @@ export const VACATION_KEYS = {
   all:    ["vacations"] as const,
   list:   (messId: string) => ["vacations", "list", messId] as const,
   active: (messId: string) => ["vacations", "active", messId] as const,
+  byId:   (id: string)     => ["vacations", "byId", id]     as const,
 };
 
 export function useVacations() {
@@ -51,6 +52,15 @@ export function useCreateVacation() {
       toast.success("ছুটি ঘোষণা করা হয়েছে এবং সব সদস্যকে জানানো হয়েছে");
     },
     onError: (err: Error) => toast.error(err.message),
+  });
+}
+
+export function useVacationById(vacationId: string | undefined) {
+  return useQuery({
+    queryKey: VACATION_KEYS.byId(vacationId ?? ""),
+    queryFn:  () => vacationService.getVacationById(vacationId!),
+    enabled:  !!vacationId,
+    staleTime: 5 * 60_000,
   });
 }
 
