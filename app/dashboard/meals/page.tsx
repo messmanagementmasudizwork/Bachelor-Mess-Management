@@ -105,49 +105,43 @@ export default function MealsPage() {
         />
       )}
 
-      <div className="flex flex-col sm:flex-row gap-4 items-start">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-        {/* Left column */}
-        <div className="flex flex-col gap-4 flex-1 min-w-0">
-          <TodayHeroSection todayMeal={getMealForDate(today)} />
+        <TodayHeroSection todayMeal={getMealForDate(today)} />
 
-          <MealLeaveSection
-            messSettings={messSettings}
-            myRole={myRole}
-            memberId={myMembership?.id}
-            joiningDate={joiningDate}
-            accountStatus={accountStatus}
-            getMealForDate={getMealForDate}
-            onUpdate={(input) => updateMeal.mutateAsync(input)}
-            isPending={updateMeal.isPending}
-          />
-        </div>
+        <TomorrowMealSection
+          tomorrowMeal={getMealForDate(tomorrow)}
+          tomorrow={tomorrow}
+          messSettings={messSettings}
+          myRole={myRole}
+          isPending={updateMeal.isPending}
+          joiningDate={joiningDate}
+          onToggle={handleTomorrowToggle}
+          onGuestChange={myMembership?.id ? handleGuestChange : undefined}
+          isGuestPending={updateMeal.isPending}
+        />
 
-        {/* Right column */}
-        <div className="flex flex-col gap-4 flex-1 min-w-0">
-          <TomorrowMealSection
-            tomorrowMeal={getMealForDate(tomorrow)}
-            tomorrow={tomorrow}
-            messSettings={messSettings}
-            myRole={myRole}
-            isPending={updateMeal.isPending}
-            joiningDate={joiningDate}
-            onToggle={handleTomorrowToggle}
-            onGuestChange={myMembership?.id ? handleGuestChange : undefined}
-            isGuestPending={updateMeal.isPending}
-          />
+        <MealLeaveSection
+          messSettings={messSettings}
+          myRole={myRole}
+          memberId={myMembership?.id}
+          joiningDate={joiningDate}
+          accountStatus={accountStatus}
+          getMealForDate={getMealForDate}
+          onUpdate={(input) => updateMeal.mutateAsync(input)}
+          isPending={updateMeal.isPending}
+        />
 
-          <MealMonthSummaryCard
-            myMeals={myMeals ?? []}
-            activeMonth={activeMonth}
-            isLoading={isLoading}
-            analyticsMyMeals={viewMonthMeals ?? []}
-            analyticsViewMonth={viewMonth}
-            setAnalyticsViewMonth={setViewMonth}
-            analyticsJoiningDate={joiningDate}
-            analyticsIsLoading={calendarLoading}
-          />
-        </div>
+        <MealMonthSummaryCard
+          myMeals={myMeals ?? []}
+          activeMonth={activeMonth}
+          isLoading={isLoading}
+          analyticsMyMeals={viewMonthMeals ?? []}
+          analyticsViewMonth={viewMonth}
+          setAnalyticsViewMonth={setViewMonth}
+          analyticsJoiningDate={joiningDate}
+          analyticsIsLoading={calendarLoading}
+        />
 
       </div>
 

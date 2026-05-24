@@ -1,6 +1,6 @@
 "use client";
-import { useMemo } from "react";
-import { ChevronLeft, ChevronRight, BarChart3, UtensilsCrossed, Users, TrendingDown, Coffee, Sun, Moon, CheckCircle2, Clock } from "lucide-react";
+import { useMemo, useState } from "react";
+import { ChevronLeft, ChevronRight, ChevronDown, ChevronUp, BarChart3, UtensilsCrossed, Users, TrendingDown, Coffee, Sun, Moon, CheckCircle2, Clock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { formatMonth, getTodayString, getDaysInMonth, prevMonth, nextMonth, getCurrentMonthString } from "@/lib/utils/date";
@@ -43,6 +43,7 @@ export function MealMonthSummaryCard({
 }: Props) {
   const { t } = useLanguage();
   const today = getTodayString();
+  const [analysisOpen, setAnalysisOpen] = useState(false);
 
   // ── Monthly Summary stats ─────────────────────────────────
   const stats = useMemo(() => {
@@ -257,77 +258,97 @@ export function MealMonthSummaryCard({
               <p className="text-center text-xs text-muted-foreground py-2">{t.meals.noMealData}</p>
             )}
 
-            {/* ── Analysis Section ───────────────────────────── */}
+            {/* ── Analysis Section (collapsible) ─────────────── */}
             {analyticsViewMonth && setAnalyticsViewMonth && (
               <div className="border-t pt-3 space-y-3">
-                {/* Analysis header with month nav */}
-                <div className="flex items-center justify-between">
+                {/* Clickable header — toggles collapse */}
+                <button
+                  type="button"
+                  onClick={() => setAnalysisOpen((o) => !o)}
+                  className="w-full flex items-center justify-between group"
+                >
                   <div className="flex items-center gap-1.5">
                     <BarChart3 className="h-3.5 w-3.5 text-primary" />
                     <span className="text-xs font-semibold">{t.meals.mealAnalysis} {formatMonth(analyticsViewMonth)}</span>
                   </div>
                   <div className="flex items-center gap-0.5">
-                    <Button variant="ghost" size="icon-sm" onClick={() => setAnalyticsViewMonth(prevMonth(analyticsViewMonth))}>
-                      <ChevronLeft className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button variant="ghost" size="icon-sm"
-                      onClick={() => setAnalyticsViewMonth(nextMonth(analyticsViewMonth))}
-                      disabled={analyticsViewMonth >= getCurrentMonthString()}>
-                      <ChevronRight className="h-3.5 w-3.5" />
-                    </Button>
+                    {analysisOpen && (
+                      <>
+                        <Button
+                          variant="ghost" size="icon-sm"
+                          onClick={(e) => { e.stopPropagation(); setAnalyticsViewMonth(prevMonth(analyticsViewMonth)); }}
+                        >
+                          <ChevronLeft className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button
+                          variant="ghost" size="icon-sm"
+                          onClick={(e) => { e.stopPropagation(); setAnalyticsViewMonth(nextMonth(analyticsViewMonth)); }}
+                          disabled={analyticsViewMonth >= getCurrentMonthString()}
+                        >
+                          <ChevronRight className="h-3.5 w-3.5" />
+                        </Button>
+                      </>
+                    )}
+                    <span className="text-muted-foreground group-hover:text-foreground transition-colors ml-1">
+                      {analysisOpen
+                        ? <ChevronUp className="h-3.5 w-3.5" />
+                        : <ChevronDown className="h-3.5 w-3.5" />}
+                    </span>
                   </div>
-                </div>
+                </button>
 
-                {analyticsIsLoading ? (
-                  <div className="space-y-2">
-                    {[1, 2].map((i) => <div key={i} className="h-12 rounded-xl bg-muted animate-pulse" />)}
-                  </div>
-                ) : !analytics || analytics.totalMeals === 0 ? (
-                  <p className="text-center text-xs text-muted-foreground py-3">{t.meals.noMealData}</p>
-                ) : (
-                  <>
-                    {/* 4 stat boxes */}
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="p-2.5 rounded-xl bg-primary/10 text-center border border-primary/10">
-                        <p className="text-xl font-bold text-primary">{analytics.totalMeals}</p>
-                        <p className="text-[10px] text-muted-foreground mt-0.5">{t.meals.totalMealsCount}</p>
-                      </div>
-                      <div className="p-2.5 rounded-xl bg-green-50 text-center border border-green-100">
-                        <p className="text-xl font-bold text-green-700">{analytics.onDays}/{analytics.elapsedDays}</p>
-                        <p className="text-[10px] text-muted-foreground mt-0.5">{t.meals.activeDays}</p>
-                      </div>
-                      <div className="p-2.5 rounded-xl bg-amber-50 text-center border border-amber-100">
-                        <p className="text-xl font-bold text-amber-700">{analytics.pct}%</p>
-                        <p className="text-[10px] text-muted-foreground mt-0.5">{t.meals.attendanceRate}</p>
-                      </div>
-                      <div className="p-2.5 rounded-xl bg-purple-50 text-center border border-purple-100">
-                        <p className="text-xl font-bold text-purple-700">{analytics.guestTotal}</p>
-                        <p className="text-[10px] text-muted-foreground mt-0.5">{t.meals.guestMealsCount}</p>
-                      </div>
-                    </div>
-
-                    {/* Meal bars */}
+                {analysisOpen && (
+                  analyticsIsLoading ? (
                     <div className="space-y-2">
-                      {analyticsBars.map((b) => (
-                        <div key={b.label} className="space-y-1">
-                          <div className="flex justify-between text-[11px] items-center">
-                            <span className="flex items-center gap-1 font-medium">
-                              <span>{b.emoji}</span><span>{b.label}</span>
-                            </span>
-                            <span className="text-muted-foreground tabular-nums">
-                              {t.meals.dayCountFmt.replace("{count}", String(b.count)).replace("{pct}", String(Math.round((b.count / Math.max(analytics.totalDays, 1)) * 100)))}
-                            </span>
-                          </div>
-                          <div className="h-2 rounded-full bg-muted overflow-hidden">
-                            <div
-                              className={cn("h-full rounded-full transition-all duration-700", b.color)}
-                              style={{ width: `${(b.count / Math.max(analytics.totalDays, 1)) * 100}%` }}
-                            />
-                          </div>
-                        </div>
-                      ))}
+                      {[1, 2].map((i) => <div key={i} className="h-12 rounded-xl bg-muted animate-pulse" />)}
                     </div>
-                  </>
+                  ) : !analytics || analytics.totalMeals === 0 ? (
+                    <p className="text-center text-xs text-muted-foreground py-3">{t.meals.noMealData}</p>
+                  ) : (
+                    <>
+                      {/* 4 stat boxes */}
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="p-2.5 rounded-xl bg-primary/10 text-center border border-primary/10">
+                          <p className="text-xl font-bold text-primary">{analytics.totalMeals}</p>
+                          <p className="text-[10px] text-muted-foreground mt-0.5">{t.meals.totalMealsCount}</p>
+                        </div>
+                        <div className="p-2.5 rounded-xl bg-green-50 text-center border border-green-100">
+                          <p className="text-xl font-bold text-green-700">{analytics.onDays}/{analytics.elapsedDays}</p>
+                          <p className="text-[10px] text-muted-foreground mt-0.5">{t.meals.activeDays}</p>
+                        </div>
+                        <div className="p-2.5 rounded-xl bg-amber-50 text-center border border-amber-100">
+                          <p className="text-xl font-bold text-amber-700">{analytics.pct}%</p>
+                          <p className="text-[10px] text-muted-foreground mt-0.5">{t.meals.attendanceRate}</p>
+                        </div>
+                        <div className="p-2.5 rounded-xl bg-purple-50 text-center border border-purple-100">
+                          <p className="text-xl font-bold text-purple-700">{analytics.guestTotal}</p>
+                          <p className="text-[10px] text-muted-foreground mt-0.5">{t.meals.guestMealsCount}</p>
+                        </div>
+                      </div>
+
+                      {/* Meal bars */}
+                      <div className="space-y-2">
+                        {analyticsBars.map((b) => (
+                          <div key={b.label} className="space-y-1">
+                            <div className="flex justify-between text-[11px] items-center">
+                              <span className="flex items-center gap-1 font-medium">
+                                <span>{b.emoji}</span><span>{b.label}</span>
+                              </span>
+                              <span className="text-muted-foreground tabular-nums">
+                                {t.meals.dayCountFmt.replace("{count}", String(b.count)).replace("{pct}", String(Math.round((b.count / Math.max(analytics.totalDays, 1)) * 100)))}
+                              </span>
+                            </div>
+                            <div className="h-2 rounded-full bg-muted overflow-hidden">
+                              <div
+                                className={cn("h-full rounded-full transition-all duration-700", b.color)}
+                                style={{ width: `${(b.count / Math.max(analytics.totalDays, 1)) * 100}%` }}
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )
                 )}
               </div>
             )}
