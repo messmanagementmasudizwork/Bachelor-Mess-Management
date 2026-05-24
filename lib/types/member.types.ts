@@ -33,6 +33,9 @@ export interface MessMember extends AuditFields {
   role: MemberRole;
   status: MemberStatus;
   seat_number: number | null;
+  building: string | null;
+  floor_number: string | null;
+  room_number: string | null;
   joining_date: string;
   leave_start?: string | null;
   leave_end?: string | null;
@@ -59,6 +62,11 @@ export interface UserProfile {
   blood_group: string | null;
   emergency_contact: string | null;
   preferred_language: "bn" | "en";
+  company: string | null;
+  department: string | null;
+  designation: string | null;
+  job_joining_date: string | null;
+  job_id_card_no: string | null;
   created_at?: string;
 }
 

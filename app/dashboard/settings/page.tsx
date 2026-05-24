@@ -7,6 +7,7 @@ import {
   User, Lock, Bell, LogOut, Save,
   Eye, EyeOff, RefreshCw, Sun, Moon, Monitor, Globe, BellRing, BellOff,
   Shield, History, LogIn, Settings2, CopyCheck, Clock, Banknote, Calendar,
+  Briefcase, Building2,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { auditService } from "@/lib/services/audit.service";
@@ -24,7 +25,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/lib/hooks/use-auth";
-import { useMyMembership, useUpdateMealDefaults } from "@/lib/hooks/use-members";
+import { useMyMembership, useUpdateMealDefaults, useUpdateRoomInfo } from "@/lib/hooks/use-members";
 import { useApplyDefaultsToMonth } from "@/lib/hooks/use-meals";
 import { useMess } from "@/lib/hooks/use-mess";
 import { useMessStore } from "@/lib/stores/mess.store";
@@ -101,17 +102,37 @@ export default function SettingsPage() {
     path: ["confirm_password"],
   });
 
+  const workSchema = z.object({
+    company: z.string().max(150).optional().or(z.literal("")),
+    department: z.string().max(100).optional().or(z.literal("")),
+    designation: z.string().max(100).optional().or(z.literal("")),
+    job_joining_date: z.string().optional().or(z.literal("")),
+    job_id_card_no: z.string().max(100).optional().or(z.literal("")),
+  });
+
+  const roomSchema = z.object({
+    building: z.string().max(100).optional().or(z.literal("")),
+    floor_number: z.string().max(50).optional().or(z.literal("")),
+    room_number: z.string().max(50).optional().or(z.literal("")),
+    seat_number: z.coerce.number().int().positive().optional().nullable(),
+  });
+
   type ProfileForm = z.infer<typeof profileSchema>;
   type PasswordForm = z.infer<typeof passwordSchema>;
+  type WorkForm = z.infer<typeof workSchema>;
+  type RoomForm = z.infer<typeof roomSchema>;
 
   const [showNewPw, setShowNewPw] = useState(false);
   const [showConfirmPw, setShowConfirmPw] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
+  const [savingWork, setSavingWork] = useState(false);
+  const [savingRoom, setSavingRoom] = useState(false);
   const [pinDialogMode, setPinDialogMode] = useState<"set" | "change" | "remove" | null>(null);
   const { isPinSet } = usePinProtection();
   const pinIsSet = isPinSet();
 
+  const updateRoomInfo = useUpdateRoomInfo();
   const [mealDefaults, setMealDefaults] = useState({ breakfast: true, lunch: true, dinner: true });
   const updateMealDefaults = useUpdateMealDefaults();
   const applyDefaultsToMonth = useApplyDefaultsToMonth();
@@ -122,6 +143,12 @@ export default function SettingsPage() {
         breakfast: myMembership.meal_default_breakfast ?? true,
         lunch: myMembership.meal_default_lunch ?? true,
         dinner: myMembership.meal_default_dinner ?? true,
+      });
+      roomForm.reset({
+        building: myMembership.building ?? "",
+        floor_number: myMembership.floor_number ?? "",
+        room_number: myMembership.room_number ?? "",
+        seat_number: myMembership.seat_number ?? null,
       });
     }
   }, [myMembership?.id]);
@@ -190,6 +217,27 @@ export default function SettingsPage() {
     },
   });
 
+  const workForm = useForm<WorkForm>({
+    resolver: zodResolver(workSchema),
+    defaultValues: {
+      company: "",
+      department: "",
+      designation: "",
+      job_joining_date: "",
+      job_id_card_no: "",
+    },
+  });
+
+  const roomForm = useForm<RoomForm>({
+    resolver: zodResolver(roomSchema),
+    defaultValues: {
+      building: "",
+      floor_number: "",
+      room_number: "",
+      seat_number: null,
+    },
+  });
+
   useEffect(() => {
     if (profileData) {
       profileForm.reset({
@@ -198,6 +246,13 @@ export default function SettingsPage() {
         profession: profileData.profession ?? "",
         blood_group: profileData.blood_group ?? "",
         emergency_contact: profileData.emergency_contact ?? "",
+      });
+      workForm.reset({
+        company: profileData.company ?? "",
+        department: profileData.department ?? "",
+        designation: profileData.designation ?? "",
+        job_joining_date: profileData.job_joining_date ?? "",
+        job_id_card_no: profileData.job_id_card_no ?? "",
       });
       if (profileData.ui_theme && ["light", "dark", "system"].includes(profileData.ui_theme)) {
         setTheme(profileData.ui_theme);
@@ -230,6 +285,43 @@ export default function SettingsPage() {
       toast.error((err as Error).message);
     } finally {
       setSavingProfile(false);
+    }
+  };
+
+  const onSaveWork = async (data: WorkForm) => {
+    setSavingWork(true);
+    try {
+      await authService.updateProfile({
+        company: data.company || undefined,
+        department: data.department || undefined,
+        designation: data.designation || undefined,
+        job_joining_date: data.job_joining_date || undefined,
+        job_id_card_no: data.job_id_card_no || undefined,
+      });
+      toast.success(t.settings.workInfoSaved);
+    } catch (err) {
+      toast.error((err as Error).message);
+    } finally {
+      setSavingWork(false);
+    }
+  };
+
+  const onSaveRoom = async (data: RoomForm) => {
+    if (!myMembership?.id) return;
+    setSavingRoom(true);
+    try {
+      await updateRoomInfo.mutateAsync({
+        memberId: myMembership.id,
+        info: {
+          building: data.building || null,
+          floor_number: data.floor_number || null,
+          room_number: data.room_number || null,
+          seat_number: data.seat_number ?? null,
+        },
+      });
+    } catch {
+    } finally {
+      setSavingRoom(false);
     }
   };
 
@@ -360,7 +452,88 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
 
-      {/* ── 2. Preferences (combined) ──────────────────────────── */}
+      {/* ── 2. Work Information ────────────────────────────────── */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Briefcase className="h-4 w-4" />
+            {t.settings.workInfo}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={workForm.handleSubmit(onSaveWork)} className="space-y-4">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label className="text-xs">{t.settings.company}</Label>
+                <Input {...workForm.register("company")} placeholder={t.settings.companyPlaceholder} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">{t.settings.department}</Label>
+                <Input {...workForm.register("department")} placeholder={t.settings.departmentPlaceholder} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">{t.settings.designation}</Label>
+                <Input {...workForm.register("designation")} placeholder={t.settings.designationPlaceholder} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">{t.settings.jobJoiningDate}</Label>
+                <Input type="date" {...workForm.register("job_joining_date")} />
+              </div>
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label className="text-xs">{t.settings.jobIdCardNo}</Label>
+                <Input {...workForm.register("job_id_card_no")} placeholder={t.settings.jobIdCardNoPlaceholder} />
+              </div>
+            </div>
+            <Button type="submit" disabled={savingWork} className="gap-1.5">
+              <Save className="h-4 w-4" />
+              {savingWork ? t.saving : t.settings.saveWorkInfo}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+
+      {/* ── 3. Room & Seat Information ─────────────────────────── */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Building2 className="h-4 w-4" />
+            {t.settings.roomInfo}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={roomForm.handleSubmit(onSaveRoom)} className="space-y-4">
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label className="text-xs">{t.settings.building}</Label>
+                <Input {...roomForm.register("building")} placeholder={t.settings.buildingPlaceholder} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">{t.settings.floorNumber}</Label>
+                <Input {...roomForm.register("floor_number")} placeholder={t.settings.floorPlaceholder} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">{t.settings.roomNumber}</Label>
+                <Input {...roomForm.register("room_number")} placeholder={t.settings.roomPlaceholder} />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs">{t.settings.seatNumber}</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  {...roomForm.register("seat_number", { valueAsNumber: true })}
+                  placeholder="e.g. 5"
+                />
+              </div>
+            </div>
+            <Button type="submit" disabled={savingRoom || !myMembership?.id} className="gap-1.5">
+              <Save className="h-4 w-4" />
+              {savingRoom ? t.saving : t.settings.saveRoomInfo}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+
+      {/* ── 4. Preferences (combined) ──────────────────────────── */}
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">

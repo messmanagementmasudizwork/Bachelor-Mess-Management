@@ -8,6 +8,7 @@ export const memberService = {
       .from("mess_members")
       .select(`
         id, mess_id, user_id, role, status, seat_number,
+        building, floor_number, room_number,
         joining_date, leave_start, leave_end,
         meal_default_breakfast, meal_default_lunch, meal_default_dinner,
         account_status, open_leave_started, leave_violation_since,
@@ -31,9 +32,10 @@ export const memberService = {
       .from("mess_members")
       .select(`
         id, mess_id, user_id, role, status, seat_number,
+        building, floor_number, room_number,
         joining_date, meal_default_breakfast, meal_default_lunch, meal_default_dinner,
         account_status, open_leave_started, leave_violation_since,
-        user:profiles(id, full_name, phone, email, avatar_url, profession, blood_group)
+        user:profiles(id, full_name, phone, email, avatar_url, profession, blood_group, company, department, designation, job_joining_date, job_id_card_no)
       `)
       .eq("mess_id", messId)
       .eq("user_id", userId)
@@ -90,6 +92,20 @@ export const memberService = {
     const { error } = await supabase
       .from("mess_members")
       .update({ seat_number: seatNumber, updated_at: new Date().toISOString() })
+      .eq("id", memberId);
+    if (error) throw new Error(error.message);
+  },
+
+  async updateRoomInfo(memberId: string, info: {
+    building?: string | null;
+    floor_number?: string | null;
+    room_number?: string | null;
+    seat_number?: number | null;
+  }) {
+    const supabase = getRequiredClient();
+    const { error } = await supabase
+      .from("mess_members")
+      .update({ ...info, updated_at: new Date().toISOString() })
       .eq("id", memberId);
     if (error) throw new Error(error.message);
   },

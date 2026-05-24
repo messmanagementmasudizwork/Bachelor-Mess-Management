@@ -2,10 +2,10 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { memberService } from "@/lib/services/member.service";
 import { notificationService } from "@/lib/services/notification.service";
-import { useAuth } from "./use-auth";
 import { useMessStore } from "@/lib/stores/mess.store";
 import { toast } from "sonner";
 import { getT } from "@/lib/i18n/get-t";
+import { useAuth } from "./use-auth";
 import type { MemberRole, MemberStatus } from "@/lib/types";
 
 export const MEMBER_KEYS = {
@@ -158,6 +158,25 @@ export function useUpdateSeatNumber() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: MEMBER_KEYS.list(activeMess?.id!) });
       toast.success(getT().toasts.seatUpdated);
+    },
+    onError: (error: Error) => toast.error(error.message),
+  });
+}
+
+export function useUpdateRoomInfo() {
+  const { activeMess } = useMessStore();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ memberId, info }: {
+      memberId: string;
+      info: { building?: string | null; floor_number?: string | null; room_number?: string | null; seat_number?: number | null };
+    }) => memberService.updateRoomInfo(memberId, info),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: MEMBER_KEYS.me(activeMess?.id!, user?.id!) });
+      queryClient.invalidateQueries({ queryKey: MEMBER_KEYS.list(activeMess?.id!) });
+      toast.success(getT().settings.roomInfoSaved);
     },
     onError: (error: Error) => toast.error(error.message),
   });

@@ -117,14 +117,26 @@ export const authService = {
     const supabase = getSupabase();
     const { data, error } = await supabase
       .from("profiles")
-      .select("full_name, phone, avatar_url, profession, blood_group, emergency_contact, preferred_language, ui_theme, currency_symbol, date_format, time_format")
+      .select("full_name, phone, avatar_url, profession, blood_group, emergency_contact, preferred_language, ui_theme, currency_symbol, date_format, time_format, company, department, designation, job_joining_date, job_id_card_no")
       .eq("id", userId)
       .single();
     if (error) return null;
     return data;
   },
 
-  async updateProfile(updates: { full_name?: string; phone?: string; avatar_url?: string; profession?: string; blood_group?: string; emergency_contact?: string }) {
+  async updateProfile(updates: {
+    full_name?: string;
+    phone?: string;
+    avatar_url?: string;
+    profession?: string;
+    blood_group?: string;
+    emergency_contact?: string;
+    company?: string;
+    department?: string;
+    designation?: string;
+    job_joining_date?: string;
+    job_id_card_no?: string;
+  }) {
     const supabase = getSupabase();
     const user = await this.getUser();
     if (!user) throw new Error("Not authenticated");
