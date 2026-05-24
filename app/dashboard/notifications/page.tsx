@@ -1,14 +1,20 @@
 "use client";
-import { Bell, CheckCheck, Check } from "lucide-react";
+import { useState } from "react";
+import { Bell, CheckCheck, Check, ExternalLink } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/shared/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
+} from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { formatTimestamp } from "@/lib/utils/date";
 import { useNotifications, useMarkAsRead, useMarkAllAsRead } from "@/lib/hooks/use-notifications";
 import type { NotificationType } from "@/lib/types";
+import type { Notification } from "@/lib/types/notification.types";
 import { useLanguage } from "@/lib/hooks/use-language";
+import { useRouter } from "next/navigation";
 
 const notificationTypeConfig: Record<NotificationType | "default", { icon: string; color: string }> = {
   expense_added:        { icon: "🛒", color: "bg-orange-100 text-orange-700" },
@@ -27,18 +33,27 @@ const notificationTypeConfig: Record<NotificationType | "default", { icon: strin
   default:              { icon: "🔔", color: "bg-gray-100 text-gray-700" },
 };
 
+function fullTimestamp(dateStr: string): string {
+  return new Date(dateStr).toLocaleDateString("en-GB", {
+    day: "numeric", month: "long", year: "numeric",
+    hour: "2-digit", minute: "2-digit",
+  });
+}
+
 export default function NotificationsPage() {
   const { t } = useLanguage();
+  const router = useRouter();
   const { data: notifications, isLoading } = useNotifications();
   const markAsRead = useMarkAsRead();
   const markAllAsRead = useMarkAllAsRead();
 
+  const [selectedNotif, setSelectedNotif] = useState<Notification | null>(null);
+
   const unreadCount = notifications?.filter((n) => !n.is_read).length ?? 0;
 
-  const handleClick = (id: string, isRead: boolean) => {
-    if (!isRead) {
-      markAsRead.mutate(id);
-    }
+  const openDetail = (notif: Notification) => {
+    if (!notif.is_read) markAsRead.mutate(notif.id);
+    setSelectedNotif(notif);
   };
 
   return (
@@ -86,7 +101,7 @@ export default function NotificationsPage() {
             return (
               <Card
                 key={notification.id}
-                onClick={() => handleClick(notification.id, notification.is_read)}
+                onClick={() => openDetail(notification)}
                 className={cn(
                   "transition-all cursor-pointer hover:shadow-md active:scale-[0.99]",
                   !notification.is_read && "border-primary/30 bg-primary/5"
@@ -130,6 +145,52 @@ export default function NotificationsPage() {
           })}
         </div>
       )}
+
+      {/* Notification detail dialog */}
+      <Dialog open={!!selectedNotif} onOpenChange={(open) => { if (!open) setSelectedNotif(null); }}>
+        {selectedNotif && (
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <div className="flex justify-center mb-4">
+                <div className={cn(
+                  "flex h-16 w-16 items-center justify-center rounded-2xl text-3xl",
+                  (notificationTypeConfig[selectedNotif.type as NotificationType] ?? notificationTypeConfig.default).color
+                )}>
+                  {(notificationTypeConfig[selectedNotif.type as NotificationType] ?? notificationTypeConfig.default).icon}
+                </div>
+              </div>
+              <DialogTitle className="text-center text-base font-semibold leading-snug">
+                {selectedNotif.title}
+              </DialogTitle>
+            </DialogHeader>
+
+            <DialogDescription asChild>
+              <div className="space-y-4">
+                <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap text-center">
+                  {selectedNotif.body}
+                </p>
+
+                <p className="text-xs text-muted-foreground text-center">
+                  🕐 {fullTimestamp(selectedNotif.created_at)}
+                </p>
+
+                {selectedNotif.action_url && (
+                  <Button
+                    className="w-full gap-2"
+                    onClick={() => {
+                      setSelectedNotif(null);
+                      router.push(selectedNotif.action_url!);
+                    }}
+                  >
+                    View Details
+                    <ExternalLink className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            </DialogDescription>
+          </DialogContent>
+        )}
+      </Dialog>
     </div>
   );
 }
