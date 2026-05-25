@@ -501,7 +501,7 @@ export default function SettingsPage() {
 
               return (
                 <div className="rounded-xl border bg-muted/20 p-3 flex flex-col gap-2.5">
-                  <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">
+                  <p className="text-muted-foreground uppercase tracking-wide font-bold text-center text-[13px] bg-[transparent]">
                     {monthLabel} — {t.settings.monthlySummaryTitle}
                   </p>
                   <div className="grid grid-cols-2 gap-2">
