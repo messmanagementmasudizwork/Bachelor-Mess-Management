@@ -762,8 +762,10 @@ export default function SettingsPage() {
                 <SelectContent>
                   {currencyOptions.map(({ value, label, symbolCls }) => (
                     <SelectItem key={value} value={value} className="text-xs">
-                      <span className={symbolCls}>{label}</span>
-                      <span className="ml-2 text-xs text-muted-foreground">1,250</span>
+                      <span className="flex items-center gap-2">
+                        <span className={cn("inline-block w-9 text-right", symbolCls)}>{label}</span>
+                        <span className="text-xs text-muted-foreground">1,250</span>
+                      </span>
                     </SelectItem>
                   ))}
                 </SelectContent>
