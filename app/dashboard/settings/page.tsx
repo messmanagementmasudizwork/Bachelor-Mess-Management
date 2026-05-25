@@ -615,12 +615,12 @@ export default function SettingsPage() {
             {t.settingsExt.preferencesTitle}
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-5">
+        <CardContent className="p-4">
+          {/* 3×2 grid: col3 spans 2 rows */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 lg:[grid-template-rows:auto_auto]">
 
-          {/* Theme + Language — 2-col grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Theme */}
-            <div>
+            {/* ── Col 1 Row 1 — Theme ── */}
+            <div className="rounded-xl border bg-muted/20 p-3 space-y-2">
               <SectionLabel icon={<Sun className="h-3.5 w-3.5" />} label={t.settings.theme} />
               <div className="grid grid-cols-3 gap-1.5">
                 {[
@@ -650,8 +650,8 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            {/* Language */}
-            <div>
+            {/* ── Col 2 Row 1 — Language ── */}
+            <div className="rounded-xl border bg-muted/20 p-3 space-y-2">
               <SectionLabel icon={<Globe className="h-3.5 w-3.5" />} label={t.settings.language} />
               <div className="grid grid-cols-2 gap-1.5">
                 {[
@@ -674,16 +674,51 @@ export default function SettingsPage() {
                 ))}
               </div>
             </div>
-          </div>
 
-          <Separator />
+            {/* ── Col 3 Row 1+2 — Recurring Meal Defaults ── */}
+            <div className="rounded-xl border bg-muted/20 p-3 space-y-2 lg:row-span-2 sm:col-span-2 lg:col-span-1">
+              <SectionLabel icon={<Settings2 className="h-3.5 w-3.5" />} label={t.meals.recurringDefaults} />
+              <p className="text-xs text-muted-foreground">{t.meals.applyDefaultsNote}</p>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { key: "breakfast" as const, label: t.meals.breakfastFull, emoji: "🌅" },
+                  { key: "lunch"     as const, label: t.meals.lunchFull,     emoji: "☀️" },
+                  { key: "dinner"    as const, label: t.meals.dinnerFull,    emoji: "🌙" },
+                ].map(({ key, label, emoji }) => (
+                  <div
+                    key={key}
+                    className={cn(
+                      "flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-colors",
+                      mealDefaults[key] ? "border-green-200 bg-green-50/40" : "border-border bg-background"
+                    )}
+                  >
+                    <span className="text-xl">{emoji}</span>
+                    <p className="text-xs font-medium text-center leading-tight">{label}</p>
+                    <Switch
+                      checked={mealDefaults[key]}
+                      onCheckedChange={(v) => setMealDefaults((prev) => ({ ...prev, [key]: v }))}
+                    />
+                  </div>
+                ))}
+              </div>
+              <Button
+                onClick={handleOpenDefaultsDialog}
+                disabled={updateMealDefaults.isPending || applyDefaultsToMonth.isPending || !myMembership?.id}
+                variant="outline"
+                size="sm"
+                className="w-full gap-1.5 mt-1"
+              >
+                <CopyCheck className="h-3.5 w-3.5" />
+                {(updateMealDefaults.isPending || applyDefaultsToMonth.isPending)
+                  ? t.meals.applyingDefaults
+                  : t.meals.applyDefaultsToMonth}
+              </Button>
+            </div>
 
-          {/* Date & Time + Currency Symbol — same row */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Date & Time */}
-            <div>
+            {/* ── Col 1 Row 2 — Date & Time ── */}
+            <div className="rounded-xl border bg-muted/20 p-3 space-y-2">
               <SectionLabel icon={<Calendar className="h-3.5 w-3.5" />} label={t.settingsExt.dateTimeSection} />
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 {/* Date format */}
                 <div>
                   <p className="text-xs text-muted-foreground mb-1.5">{t.settingsExt.dateFormatLabel}</p>
@@ -699,19 +734,18 @@ export default function SettingsPage() {
                           }
                         }}
                         className={cn(
-                          "flex items-center justify-between px-3 py-2 rounded-lg border-2 text-xs font-medium transition-all text-left",
+                          "flex items-center justify-between px-2 py-1.5 rounded-lg border-2 text-xs font-medium transition-all text-left",
                           dateFormat === value
                             ? "border-primary bg-primary/10 text-primary"
                             : "border-border hover:bg-muted/50 text-muted-foreground"
                         )}
                       >
-                        <span className="font-mono">{example}</span>
-                        {dateFormat === value && <span className="text-[10px] bg-primary/20 text-primary px-1.5 py-0.5 rounded-full">✓</span>}
+                        <span className="font-mono truncate">{example}</span>
+                        {dateFormat === value && <span className="text-[10px] bg-primary/20 text-primary px-1 py-0.5 rounded-full shrink-0">✓</span>}
                       </button>
                     ))}
                   </div>
                 </div>
-
                 {/* Time format */}
                 <div>
                   <p className="text-xs text-muted-foreground mb-1.5">{t.settingsExt.timeFormatLabel}</p>
@@ -727,7 +761,7 @@ export default function SettingsPage() {
                           }
                         }}
                         className={cn(
-                          "flex items-center justify-between px-3 py-2 rounded-lg border-2 text-xs font-medium transition-all",
+                          "flex items-center justify-between px-2 py-1.5 rounded-lg border-2 text-xs font-medium transition-all",
                           timeFormat === value
                             ? "border-primary bg-primary/10 text-primary"
                             : "border-border hover:bg-muted/50 text-muted-foreground"
@@ -742,8 +776,8 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            {/* Currency symbol */}
-            <div>
+            {/* ── Col 2 Row 2 — Currency Symbol ── */}
+            <div className="rounded-xl border bg-muted/20 p-3 space-y-2">
               <SectionLabel icon={<Banknote className="h-3.5 w-3.5" />} label={t.settingsExt.currencyLabel} />
               <div className="grid grid-cols-3 gap-2">
                 {currencyOptions.map(({ value, label, preview }) => (
@@ -769,51 +803,10 @@ export default function SettingsPage() {
                 ))}
               </div>
             </div>
+
           </div>
 
-          <Separator />
-
-          {/* Recurring Meal Defaults */}
-          <div>
-            <SectionLabel icon={<Settings2 className="h-3.5 w-3.5" />} label={t.meals.recurringDefaults} />
-            <p className="text-xs text-muted-foreground mb-2">{t.meals.applyDefaultsNote}</p>
-            <div className="grid grid-cols-3 gap-2 mb-3">
-              {[
-                { key: "breakfast" as const, label: t.meals.breakfastFull, emoji: "🌅" },
-                { key: "lunch"     as const, label: t.meals.lunchFull,     emoji: "☀️" },
-                { key: "dinner"    as const, label: t.meals.dinnerFull,    emoji: "🌙" },
-              ].map(({ key, label, emoji }) => (
-                <div
-                  key={key}
-                  className={cn(
-                    "flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-colors",
-                    mealDefaults[key] ? "border-green-200 bg-green-50/40" : "border-border bg-background"
-                  )}
-                >
-                  <span className="text-xl">{emoji}</span>
-                  <p className="text-xs font-medium text-center leading-tight">{label}</p>
-                  <Switch
-                    checked={mealDefaults[key]}
-                    onCheckedChange={(v) => setMealDefaults((prev) => ({ ...prev, [key]: v }))}
-                  />
-                </div>
-              ))}
-            </div>
-            <Button
-              onClick={handleOpenDefaultsDialog}
-              disabled={updateMealDefaults.isPending || applyDefaultsToMonth.isPending || !myMembership?.id}
-              variant="outline"
-              size="sm"
-              className="w-full gap-1.5"
-            >
-              <CopyCheck className="h-3.5 w-3.5" />
-              {(updateMealDefaults.isPending || applyDefaultsToMonth.isPending)
-                ? t.meals.applyingDefaults
-                : t.meals.applyDefaultsToMonth}
-            </Button>
-          </div>
-
-          <Separator />
+          <Separator className="mt-4" />
 
           {/* Notification Preferences */}
           <div>
