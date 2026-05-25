@@ -439,7 +439,7 @@ export default function SettingsPage() {
         <CardContent className="space-y-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-stretch">
             {/* Left — avatar + name */}
-            <div className="rounded-xl border border-white/20 bg-white/10 dark:bg-white/5 backdrop-blur-md p-3 flex items-center justify-between gap-4 shadow-lg">
+            <div className="rounded-xl border border-white/30 bg-background/80 dark:bg-background/70 backdrop-blur-md p-3 flex items-center justify-between gap-4 shadow-lg">
               <ImageUpload
                 currentUrl={user?.user_metadata?.avatar_url}
                 fallbackText={getInitials(user?.user_metadata?.full_name ?? user?.email ?? "U")}
