@@ -7,7 +7,7 @@ import {
   User, Lock, Bell, LogOut, Save,
   Eye, EyeOff, RefreshCw, Sun, Moon, Monitor, Globe, BellRing, BellOff,
   Shield, Settings2, CopyCheck, Clock, Banknote, Calendar,
-  Briefcase, Building2,
+  Briefcase, Building2, Utensils, TrendingUp, TrendingDown, Wallet, CreditCard,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { PinSetupDialog } from "@/components/shared/PinDialog";
@@ -26,6 +26,7 @@ import { useAuth } from "@/lib/hooks/use-auth";
 import { useMyMembership, useUpdateMealDefaults, useUpdateRoomInfo } from "@/lib/hooks/use-members";
 import { useApplyDefaultsToMonth } from "@/lib/hooks/use-meals";
 import { useMess } from "@/lib/hooks/use-mess";
+import { useMonthlyReport } from "@/lib/hooks/use-reports";
 import { useMessStore } from "@/lib/stores/mess.store";
 import { usePreferences } from "@/lib/hooks/use-preferences";
 import type { CurrencySymbol, DateFormatPref, TimeFormatPref, NumberFormatPref } from "@/lib/stores/preferences.store";
@@ -70,9 +71,10 @@ function SectionLabel({ icon, label }: { icon: React.ReactNode; label: string })
 
 export default function SettingsPage() {
   const { user, signOut } = useAuth();
-  const { activeMess } = useMessStore();
+  const { activeMess, activeMonth } = useMessStore();
   const { data: myMembership } = useMyMembership();
   const { data: mess } = useMess(activeMess?.id);
+  const { data: monthlyReport, isLoading: reportLoading } = useMonthlyReport(activeMonth ?? format(new Date(), "yyyy-MM"));
   const queryClient = useQueryClient();
   const { theme, setTheme } = useTheme();
   const { lang, setLang, t } = useLanguage();
@@ -435,52 +437,155 @@ export default function SettingsPage() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-5">
-          <div className="flex items-center gap-4">
-            <ImageUpload
-              currentUrl={user?.user_metadata?.avatar_url}
-              fallbackText={getInitials(user?.user_metadata?.full_name ?? user?.email ?? "U")}
-              size="lg"
-              onUpload={async (file) => {
-                if (!user?.id) {
-                  toast.error("User session not found. Please reload and try again.");
-                  throw new Error("User session not found");
-                }
-                try {
-                  const url = await storageService.uploadAvatar(user.id, file);
-                  await authService.updateProfile({ avatar_url: url });
-                  queryClient.invalidateQueries({ queryKey: ["profile", user.id] });
-                  toast.success(t.settings.imageUpdateSuccess);
-                } catch (err) {
-                  console.error("[PhotoUpload] upload failed:", err);
-                  throw err;
-                }
-              }}
-              onRemove={async () => {
-                if (!user?.id) {
-                  toast.error("User session not found. Please reload and try again.");
-                  throw new Error("User session not found");
-                }
-                try {
-                  await storageService.deleteAvatar(user.id);
-                  await authService.updateProfile({ avatar_url: null });
-                  queryClient.invalidateQueries({ queryKey: ["profile", user.id] });
-                  toast.success(t.settings.imageRemoveSuccess ?? "Photo removed");
-                } catch (err) {
-                  console.error("[PhotoUpload] remove failed:", err);
-                  throw err;
-                }
-              }}
-            />
-            <div>
-              <p className="font-semibold">{user?.user_metadata?.full_name ?? t.settings.noName}</p>
-              <p className="text-sm text-muted-foreground">{user?.email}</p>
-              {myMembership && (
-                <Badge variant="secondary" className="mt-1 text-xs">
-                  {getRoleDisplayNameBn(myMembership.role as MemberRole)}
-                </Badge>
-              )}
-              <p className="text-xs text-muted-foreground mt-1">{t.settings.clickToChangePhoto}</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
+            {/* Left — avatar + name */}
+            <div className="flex items-center gap-4">
+              <ImageUpload
+                currentUrl={user?.user_metadata?.avatar_url}
+                fallbackText={getInitials(user?.user_metadata?.full_name ?? user?.email ?? "U")}
+                size="lg"
+                onUpload={async (file) => {
+                  if (!user?.id) {
+                    toast.error("User session not found. Please reload and try again.");
+                    throw new Error("User session not found");
+                  }
+                  try {
+                    const url = await storageService.uploadAvatar(user.id, file);
+                    await authService.updateProfile({ avatar_url: url });
+                    queryClient.invalidateQueries({ queryKey: ["profile", user.id] });
+                    toast.success(t.settings.imageUpdateSuccess);
+                  } catch (err) {
+                    console.error("[PhotoUpload] upload failed:", err);
+                    throw err;
+                  }
+                }}
+                onRemove={async () => {
+                  if (!user?.id) {
+                    toast.error("User session not found. Please reload and try again.");
+                    throw new Error("User session not found");
+                  }
+                  try {
+                    await storageService.deleteAvatar(user.id);
+                    await authService.updateProfile({ avatar_url: null });
+                    queryClient.invalidateQueries({ queryKey: ["profile", user.id] });
+                    toast.success(t.settings.imageRemoveSuccess ?? "Photo removed");
+                  } catch (err) {
+                    console.error("[PhotoUpload] remove failed:", err);
+                    throw err;
+                  }
+                }}
+              />
+              <div>
+                <p className="font-semibold">{user?.user_metadata?.full_name ?? t.settings.noName}</p>
+                <p className="text-sm text-muted-foreground">{user?.email}</p>
+                {myMembership && (
+                  <Badge variant="secondary" className="mt-1 text-xs">
+                    {getRoleDisplayNameBn(myMembership.role as MemberRole)}
+                  </Badge>
+                )}
+                <p className="text-xs text-muted-foreground mt-1">{t.settings.clickToChangePhoto}</p>
+              </div>
             </div>
+
+            {/* Right — Monthly Summary Widget */}
+            {(() => {
+              const myReport = monthlyReport?.members.find(m => m.member_id === myMembership?.id);
+              const totalMeals = myReport?.meal_summary.total_meals ?? 0;
+              const mealRate = monthlyReport?.meal_rate ?? 0;
+              const deposited = myReport?.deposited ?? 0;
+              const balance = myReport?.balance ?? 0;
+              const isAdvance = balance >= 0;
+              const monthLabel = activeMonth
+                ? format(new Date(activeMonth + "-01"), "MMMM yyyy")
+                : format(new Date(), "MMMM yyyy");
+
+              return (
+                <div className="rounded-xl border bg-muted/20 p-3 flex flex-col gap-2.5">
+                  <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">
+                    {monthLabel} — এই মাসের সারসংক্ষেপ
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {/* Total Meals */}
+                    <div className="flex items-center gap-2 rounded-lg bg-background border px-3 py-2">
+                      <div className="h-7 w-7 rounded-md bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center shrink-0">
+                        <Utensils className="h-3.5 w-3.5 text-orange-600 dark:text-orange-400" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[10px] text-muted-foreground leading-tight">মোট মিল</p>
+                        {reportLoading ? (
+                          <div className="h-4 w-8 bg-muted rounded animate-pulse mt-0.5" />
+                        ) : (
+                          <p className="text-sm font-bold leading-tight">{totalMeals}</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Meal Rate */}
+                    <div className="flex items-center gap-2 rounded-lg bg-background border px-3 py-2">
+                      <div className="h-7 w-7 rounded-md bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center shrink-0">
+                        <Banknote className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[10px] text-muted-foreground leading-tight">মিল রেট</p>
+                        {reportLoading ? (
+                          <div className="h-4 w-12 bg-muted rounded animate-pulse mt-0.5" />
+                        ) : (
+                          <p className="text-sm font-bold leading-tight">৳{mealRate.toFixed(0)}</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Deposited */}
+                    <div className="flex items-center gap-2 rounded-lg bg-background border px-3 py-2">
+                      <div className="h-7 w-7 rounded-md bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center shrink-0">
+                        <CreditCard className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[10px] text-muted-foreground leading-tight">জমা দিয়েছি</p>
+                        {reportLoading ? (
+                          <div className="h-4 w-12 bg-muted rounded animate-pulse mt-0.5" />
+                        ) : (
+                          <p className="text-sm font-bold leading-tight">৳{deposited.toFixed(0)}</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Balance */}
+                    <div className={cn(
+                      "flex items-center gap-2 rounded-lg border px-3 py-2",
+                      !reportLoading && isAdvance
+                        ? "bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-900"
+                        : "bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-900"
+                    )}>
+                      <div className={cn(
+                        "h-7 w-7 rounded-md flex items-center justify-center shrink-0",
+                        !reportLoading && isAdvance
+                          ? "bg-green-100 dark:bg-green-900/40"
+                          : "bg-red-100 dark:bg-red-900/40"
+                      )}>
+                        {!reportLoading && isAdvance
+                          ? <TrendingUp className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
+                          : <TrendingDown className="h-3.5 w-3.5 text-red-600 dark:text-red-400" />
+                        }
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[10px] text-muted-foreground leading-tight">ব্যালেন্স</p>
+                        {reportLoading ? (
+                          <div className="h-4 w-12 bg-muted rounded animate-pulse mt-0.5" />
+                        ) : (
+                          <p className={cn(
+                            "text-sm font-bold leading-tight",
+                            isAdvance ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
+                          )}>
+                            {isAdvance ? "+" : ""}৳{balance.toFixed(0)}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
 
           <Separator />
