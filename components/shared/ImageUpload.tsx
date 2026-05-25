@@ -95,7 +95,7 @@ export function ImageUpload({
           className={cn(
             SIZE_MAP[size],
             shape === "square" && "rounded-xl",
-            "transition-opacity"
+            "transition-all duration-300 group-hover:scale-75"
           )}
         >
           <AvatarImage src={displayUrl ?? undefined} className="object-cover" />
