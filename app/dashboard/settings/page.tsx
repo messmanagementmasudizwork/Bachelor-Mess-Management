@@ -748,19 +748,22 @@ export default function SettingsPage() {
                   }
                 }}
               >
-                <SelectTrigger className="h-9 text-xs font-medium">
+                <SelectTrigger className="h-9">
                   {(() => {
                     const opt = currencyOptions.find(o => o.value === currencySymbol);
-                    return opt
-                      ? <span className={cn("text-xs font-medium", opt.fontClass)}>{opt.preview}</span>
-                      : <SelectValue />;
+                    return opt ? (
+                      <span className="flex items-center gap-1.5">
+                        <span className={cn("font-bold text-base leading-none", opt.fontClass)}>{opt.label}</span>
+                        <span className="text-xs text-muted-foreground">1,250</span>
+                      </span>
+                    ) : <SelectValue />;
                   })()}
                 </SelectTrigger>
                 <SelectContent>
                   {currencyOptions.map(({ value, label, fontClass }) => (
                     <SelectItem key={value} value={value} className="text-xs">
-                      <span className={cn("font-bold text-sm", fontClass)}>{label}</span>
-                      <span className="ml-2 text-muted-foreground">1,250</span>
+                      <span className={cn("font-bold text-base leading-none", fontClass)}>{label}</span>
+                      <span className="ml-2 text-xs text-muted-foreground">1,250</span>
                     </SelectItem>
                   ))}
                 </SelectContent>
