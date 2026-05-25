@@ -402,10 +402,10 @@ export default function SettingsPage() {
     { value: "yyyy-MM-dd",   example: format(new Date(), "yyyy-MM-dd")   },
   ];
 
-  const currencyOptions: { value: CurrencySymbol; label: string; preview: string }[] = [
-    { value: "৳",   label: "৳",   preview: "৳1,250"   },
-    { value: "Tk",  label: "Tk",  preview: "Tk 1,250"  },
-    { value: "BDT", label: "BDT", preview: "BDT 1,250" },
+  const currencyOptions: { value: CurrencySymbol; label: string; preview: string; fontClass: string }[] = [
+    { value: "৳",   label: "৳",   preview: "৳ 1,250",   fontClass: "font-bengali" },
+    { value: "Tk",  label: "Tk",  preview: "Tk 1,250",  fontClass: ""             },
+    { value: "BDT", label: "BDT", preview: "BDT 1,250", fontClass: ""             },
   ];
 
   const timeOptions: { value: TimeFormatPref; label: string; example: string }[] = [
@@ -748,13 +748,19 @@ export default function SettingsPage() {
                   }
                 }}
               >
-                <SelectTrigger className="h-9 text-xs">
-                  <SelectValue />
+                <SelectTrigger className="h-9 text-xs font-medium">
+                  {(() => {
+                    const opt = currencyOptions.find(o => o.value === currencySymbol);
+                    return opt
+                      ? <span className={cn("text-xs font-medium", opt.fontClass)}>{opt.preview}</span>
+                      : <SelectValue />;
+                  })()}
                 </SelectTrigger>
                 <SelectContent>
-                  {currencyOptions.map(({ value, preview }) => (
-                    <SelectItem key={value} value={value} className="text-xs font-medium">
-                      {preview}
+                  {currencyOptions.map(({ value, label, fontClass }) => (
+                    <SelectItem key={value} value={value} className="text-xs">
+                      <span className={cn("font-bold text-sm", fontClass)}>{label}</span>
+                      <span className="ml-2 text-muted-foreground">1,250</span>
                     </SelectItem>
                   ))}
                 </SelectContent>
