@@ -165,15 +165,25 @@ export default function SettingsPage() {
   const handleOpenDefaultsDialog = () => {
     if (!myMembership?.id) return;
     const messSettings = (mess?.mess_settings ?? {}) as Partial<MessSettings>;
+    // No role bypass on settings page — everyone follows cutoff rules equally
     const myRole = undefined as MemberRole | undefined;
     const joiningDate = myMembership.joining_date as string | undefined;
     const today = getTodayString();
-    const tomorrow = new Date(new Date().setDate(new Date().getDate() + 1))
-      .toISOString().split("T")[0]!;
 
+    // Build tomorrow & day-after-tomorrow using local date (avoid UTC shift for BD UTC+6)
+    const makeLocalDateString = (daysFromToday: number): string => {
+      const d = new Date(today + "T00:00:00");
+      d.setDate(d.getDate() + daysFromToday);
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+    };
+    const tomorrow        = makeLocalDateString(1);
+    const dayAfterTomorrow = makeLocalDateString(2);
+
+    // Check if tomorrow's meal can still be changed (cutoff not yet passed for tomorrow)
+    // If yes → start from tomorrow. If no (cutoff passed) → start from day after tomorrow.
     const getSlotStart = (slot: "breakfast" | "lunch" | "dinner") => {
-      const todayCheck = checkMealToggleAllowed(slot, today, myRole, messSettings, joiningDate);
-      return todayCheck.allowed ? today : tomorrow;
+      const check = checkMealToggleAllowed(slot, tomorrow, myRole, messSettings, joiningDate);
+      return check.allowed ? tomorrow : dayAfterTomorrow;
     };
 
     setPendingSlotStartDates({
@@ -1059,8 +1069,18 @@ export default function SettingsPage() {
               const labels = { breakfast: "🌅 " + t.meals.breakfast, lunch: "☀️ " + t.meals.lunch, dinner: "🌙 " + t.meals.dinner };
               const startDate = pendingSlotStartDates?.[slot];
               const today = getTodayString();
-              const isToday = startDate === today;
+              const tomorrow = (() => {
+                const d = new Date(today + "T00:00:00"); d.setDate(d.getDate() + 1);
+                return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+              })();
+              const isTomorrow = startDate === tomorrow;
               const isOn = mealDefaults[slot];
+              // Show "Tomorrow, May 27" or "May 28" (day after tomorrow)
+              const dateLabel = startDate
+                ? isTomorrow
+                  ? `${t.meals.mealDefaultsFromTomorrow}, ${format(new Date(startDate + "T00:00:00"), "MMM d")}`
+                  : format(new Date(startDate + "T00:00:00"), "MMM d")
+                : "—";
               return (
                 <div key={slot} className="flex items-center justify-between gap-3 p-2.5 rounded-lg bg-muted/40">
                   <div className="flex items-center gap-2 min-w-0">
@@ -1070,15 +1090,22 @@ export default function SettingsPage() {
                     <Badge variant={isOn ? "default" : "secondary"} className="text-xs">
                       {isOn ? t.meals.mealOn : t.meals.mealOff}
                     </Badge>
-                    <span className={`text-xs ${isToday ? "text-green-600 dark:text-green-400 font-medium" : "text-muted-foreground"}`}>
-                      {isToday ? t.meals.mealDefaultsFromToday : t.meals.mealDefaultsFromTomorrow}
+                    <span className={`text-xs font-medium ${isTomorrow ? "text-green-600 dark:text-green-400" : "text-amber-600 dark:text-amber-400"}`}>
+                      {dateLabel}
                     </span>
                   </div>
                 </div>
               );
             })}
-            {/* Only show cutoff note when at least one slot is locked to tomorrow */}
-            {pendingSlotStartDates && Object.values(pendingSlotStartDates).some((d) => d !== getTodayString()) && (
+            {/* Show cutoff note when any slot is locked to day-after-tomorrow */}
+            {pendingSlotStartDates && (() => {
+              const today = getTodayString();
+              const tomorrow = (() => {
+                const d = new Date(today + "T00:00:00"); d.setDate(d.getDate() + 1);
+                return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+              })();
+              return Object.values(pendingSlotStartDates).some((d) => d !== tomorrow);
+            })() && (
               <p className="text-xs text-amber-600 dark:text-amber-400">{t.meals.mealDefaultsCutoffNote}</p>
             )}
             <p className="text-xs text-muted-foreground">{t.meals.mealDefaultsVacationNote}</p>

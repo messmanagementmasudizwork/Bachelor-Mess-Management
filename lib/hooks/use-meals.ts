@@ -110,50 +110,43 @@ export function useApplyDefaultsToMonth() {
     }) => {
       const today = getTodayString();
 
-      // Today: merge with existing entry — only override slots whose cutoff hasn't passed
-      const isTodayApplicable =
-        slotStartDates.breakfast === today ||
-        slotStartDates.lunch === today ||
-        slotStartDates.dinner === today;
-
-      if (isTodayApplicable) {
-        const existing = await mealService.getMealForDate(activeMess!.id, memberId, today);
-        await mealService.upsertMeal(
-          activeMess!.id,
-          memberId,
-          {
-            date: today,
-            // Unlocked slot (starts today)  → apply new default
-            // Locked slot   (starts tomorrow) → preserve existing value;
-            //   if no entry yet, fall back to DB default (true) — NOT the new default,
-            //   because cutoff has already passed for this slot today.
-            breakfast: slotStartDates.breakfast === today ? defaults.breakfast : (existing?.breakfast ?? true),
-            lunch:     slotStartDates.lunch     === today ? defaults.lunch     : (existing?.lunch     ?? true),
-            dinner:    slotStartDates.dinner    === today ? defaults.dinner    : (existing?.dinner    ?? true),
-          },
-          user!.id
-        );
-      }
-
-      // Future dates: apply defaults — but skip vacation-protected dates
+      // Fetch all existing meals for this month once
       const monthMeals = await mealService.getMonthlyMeals(activeMess!.id, memberId, activeMonth);
       const vacationDates = new Set(
         monthMeals.filter((m) => m.vacation_id != null).map((m) => m.date)
       );
 
+      // Future dates: apply defaults per slot, starting from each slot's calculated start date.
+      // slotStartDates is always tomorrow or day-after-tomorrow (never today) from settings page.
+      // Rules:
+      //   • Vacation dates → always skipped
+      //   • Manual OFF (false) → preserved per slot
+      //   • date < slotStartDate for a slot → that slot is still locked; preserve existing value
       const futureDays = getDaysInMonth(activeMonth).filter((d) => d > today);
       for (const date of futureDays) {
-        if (vacationDates.has(date)) continue; // vacation-set dates are never overwritten
+        if (vacationDates.has(date)) continue;
+
         const existing = monthMeals.find((m) => m.date === date);
+
+        const bApply = date >= slotStartDates.breakfast;
+        const lApply = date >= slotStartDates.lunch;
+        const dApply = date >= slotStartDates.dinner;
+
+        // Skip entirely if no slot applies to this date
+        if (!bApply && !lApply && !dApply) continue;
+
         await mealService.upsertMeal(
           activeMess!.id,
           memberId,
           {
             date,
-            // Manual OFF (false) is preserved — only apply new default if not manually turned off
-            breakfast: existing?.breakfast === false ? false : defaults.breakfast,
-            lunch:     existing?.lunch     === false ? false : defaults.lunch,
-            dinner:    existing?.dinner    === false ? false : defaults.dinner,
+            // Per-slot logic:
+            //   slot applies & existing is not manually OFF → use new default
+            //   slot applies & existing is manually OFF     → preserve OFF
+            //   slot not yet applicable (locked)            → preserve existing (default true)
+            breakfast: bApply ? (existing?.breakfast === false ? false : defaults.breakfast) : (existing?.breakfast ?? true),
+            lunch:     lApply ? (existing?.lunch     === false ? false : defaults.lunch)     : (existing?.lunch     ?? true),
+            dinner:    dApply ? (existing?.dinner    === false ? false : defaults.dinner)    : (existing?.dinner    ?? true),
           },
           user!.id
         );
