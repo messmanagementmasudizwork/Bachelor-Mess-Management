@@ -127,7 +127,7 @@ export const authService = {
   async updateProfile(updates: {
     full_name?: string;
     phone?: string;
-    avatar_url?: string;
+    avatar_url?: string | null;
     profession?: string;
     blood_group?: string;
     emergency_contact?: string;
@@ -145,6 +145,13 @@ export const authService = {
       .update({ ...updates, updated_at: new Date().toISOString() })
       .eq("id", user.id);
     if (error) throw new Error(error.message);
+    // Also sync avatar_url into Supabase auth user_metadata so
+    // user.user_metadata.avatar_url stays up to date in the UI
+    if ("avatar_url" in updates) {
+      await supabase.auth.updateUser({
+        data: { avatar_url: updates.avatar_url ?? null },
+      });
+    }
   },
 
   async updateUiPreferences(userId: string, prefs: { ui_theme?: "light" | "dark" | "system"; currency_symbol?: string; date_format?: string; time_format?: "12h" | "24h" }) {

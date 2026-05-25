@@ -388,6 +388,13 @@ export default function SettingsPage() {
                 queryClient.invalidateQueries({ queryKey: ["auth"] });
                 toast.success(t.settings.imageUpdateSuccess);
               }}
+              onRemove={async () => {
+                if (!user?.id) return;
+                await storageService.deleteAvatar(user.id);
+                await authService.updateProfile({ avatar_url: null });
+                queryClient.invalidateQueries({ queryKey: ["auth"] });
+                toast.success(t.settings.imageRemoveSuccess ?? "Photo removed");
+              }}
             />
             <div>
               <p className="font-semibold">{user?.user_metadata?.full_name ?? t.settings.noName}</p>

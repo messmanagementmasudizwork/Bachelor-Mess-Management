@@ -818,6 +818,7 @@ const en = {
     pageSubtitle: "Manage your account and mess",
     profileInfo: "Profile Information",
     imageUpdateSuccess: "Image updated",
+    imageRemoveSuccess: "Photo removed",
     noName: "No name",
     clickToChangePhoto: "Click to change photo",
     fullName: "Full Name *",

@@ -74,12 +74,37 @@ export const storageService = {
   },
 
   /**
-   * Upload profile avatar — saves to avatars/{userId}/avatar.{ext}
+   * Upload profile avatar — deletes ALL existing avatar files first,
+   * then saves the new one to avatars/{userId}/avatar.{ext}
+   * Ensures only 1 file ever exists regardless of extension changes.
    */
   async uploadAvatar(userId: string, file: File): Promise<string> {
+    const supabase = getRequiredClient();
+    // Delete all existing files in the user's avatar folder first
+    const { data: existing } = await supabase.storage
+      .from("avatars")
+      .list(userId);
+    if (existing && existing.length > 0) {
+      const paths = existing.map((f) => `${userId}/${f.name}`);
+      await supabase.storage.from("avatars").remove(paths);
+    }
     const ext = file.name.split(".").pop() ?? "jpg";
     const { url } = await storageService.upload("avatars", userId, file, `avatar.${ext}`);
     return url;
+  },
+
+  /**
+   * Delete all avatar files for a user from storage.
+   */
+  async deleteAvatar(userId: string): Promise<void> {
+    const supabase = getRequiredClient();
+    const { data: existing } = await supabase.storage
+      .from("avatars")
+      .list(userId);
+    if (existing && existing.length > 0) {
+      const paths = existing.map((f) => `${userId}/${f.name}`);
+      await supabase.storage.from("avatars").remove(paths);
+    }
   },
 
   /**

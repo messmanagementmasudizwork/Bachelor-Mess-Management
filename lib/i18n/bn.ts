@@ -818,6 +818,7 @@ const bn = {
     pageSubtitle: "অ্যাকাউন্ট ও মেস পরিচালনা করুন",
     profileInfo: "প্রোফাইল তথ্য",
     imageUpdateSuccess: "ছবি আপডেট হয়েছে",
+    imageRemoveSuccess: "ছবি মুছে ফেলা হয়েছে",
     noName: "নাম নেই",
     clickToChangePhoto: "ছবি পরিবর্তনে ক্লিক করুন",
     fullName: "পুরো নাম *",
