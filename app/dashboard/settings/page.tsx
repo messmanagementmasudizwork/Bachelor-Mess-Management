@@ -403,8 +403,8 @@ export default function SettingsPage() {
   ];
 
   const currencyOptions: { value: CurrencySymbol; label: string; preview: string }[] = [
-    { value: "৳",   label: "৳",   preview: "৳১,২৫০" },
-    { value: "Tk",  label: "Tk",  preview: "Tk 1,250" },
+    { value: "৳",   label: "৳",   preview: "৳1,250"   },
+    { value: "Tk",  label: "Tk",  preview: "Tk 1,250"  },
     { value: "BDT", label: "BDT", preview: "BDT 1,250" },
   ];
 
