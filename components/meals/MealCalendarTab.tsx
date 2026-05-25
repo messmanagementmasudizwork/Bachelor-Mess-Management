@@ -17,9 +17,10 @@ interface Props {
   getMealForDate: (date: string) => MealEntry | undefined;
   isLoading: boolean;
   joiningDate?: string;
+  vacationDates?: Set<string>;
 }
 
-export function MealCalendarTab({ viewMonth, setViewMonth, getMealForDate, isLoading, joiningDate }: Props) {
+export function MealCalendarTab({ viewMonth, setViewMonth, getMealForDate, isLoading, joiningDate, vacationDates }: Props) {
   const { t } = useLanguage();
   const today = getTodayString();
   const days = getDaysInMonth(viewMonth);
@@ -72,7 +73,13 @@ export function MealCalendarTab({ viewMonth, setViewMonth, getMealForDate, isLoa
                 const allOff = !!meal && !bfOn && !luOn && !diOn;
                 const someOff = !!meal && (!bfOn || !luOn || !diOn) && !allOff;
                 const allOn = !!meal && bfOn && luOn && diOn;
-                const isVacation = allOff && !!meal?.vacation_id;
+                // isVacation: date is in a vacation range AND meals are all-off (or no entry yet)
+                // This handles 3 cases:
+                //  1. Past vacation dates that have no DB entry (bulkTurnOffMeals skips d < today)
+                //  2. Future vacation dates with entry + vacation_id
+                //  3. Vacation dates where vacation_id was cleared but meals are still all-off
+                const inVacationRange = vacationDates?.has(date) ?? false;
+                const isVacation = inVacationRange && (!meal || allOff);
 
                 if (isBeforeJoining) {
                   return (

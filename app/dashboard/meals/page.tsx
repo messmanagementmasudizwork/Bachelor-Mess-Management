@@ -16,6 +16,8 @@ import { AccountFrozenBanner } from "@/components/members/AccountFrozenBanner";
 import { checkMealToggleAllowed } from "@/lib/utils/meal-cutoff";
 import { computeViolationStatus } from "@/lib/utils/leave-violation";
 import { useSyncViolationStatus } from "@/lib/hooks/use-reactivation";
+import { useVacations } from "@/lib/hooks/use-vacation";
+import { getDatesInRange } from "@/lib/utils/date-range";
 import type { MessSettings, AccountStatus } from "@/lib/types";
 import { toast } from "sonner";
 import { useLanguage } from "@/lib/hooks/use-language";
@@ -35,6 +37,7 @@ export default function MealsPage() {
 
   const { data: myMeals, isLoading } = useMyMeals(myMembership?.id);
   const { data: viewMonthMeals, isLoading: calendarLoading } = useMyMeals(myMembership?.id, viewMonth, false);
+  const { data: vacations } = useVacations();
   const updateMeal = useUpdateMeal(myMembership?.id);
   const syncViolation = useSyncViolationStatus();
 
@@ -100,6 +103,15 @@ export default function MealsPage() {
 
   const getMealForDate = (date: string) => myMeals?.find((m) => m.date === date);
   const getViewMealForDate = (date: string) => viewMonthMeals?.find((m) => m.date === date);
+
+  // Build a Set of vacation dates for the currently-viewed month so the
+  // calendar can mark them even when no meal entry exists in the DB
+  // (bulkTurnOffMeals only applies to d >= today, so past vacation dates
+  //  may have no meal entry at all).
+  const vacationDatesForMonth = new Set<string>(
+    (vacations ?? []).flatMap((v) => getDatesInRange(v.start_date, v.end_date))
+      .filter((d) => d.startsWith(viewMonth))
+  );
 
   const handleTomorrowToggle = async (type: "breakfast" | "lunch" | "dinner", current: boolean) => {
     if (accountStatus !== "active") {
@@ -192,6 +204,7 @@ export default function MealsPage() {
         getMealForDate={getViewMealForDate}
         isLoading={calendarLoading}
         joiningDate={joiningDate}
+        vacationDates={vacationDatesForMonth}
       />
 
     </div>
