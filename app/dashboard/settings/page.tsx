@@ -6,14 +6,12 @@ import { z } from "zod";
 import {
   User, Lock, Bell, LogOut, Save,
   Eye, EyeOff, RefreshCw, Sun, Moon, Monitor, Globe, BellRing, BellOff,
-  Shield, History, LogIn, Settings2, CopyCheck, Clock, Banknote, Calendar,
+  Shield, Settings2, CopyCheck, Clock, Banknote, Calendar,
   Briefcase, Building2,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { auditService } from "@/lib/services/audit.service";
 import { PinSetupDialog } from "@/components/shared/PinDialog";
 import { usePinProtection } from "@/lib/hooks/use-pin";
-import { formatDistanceToNow } from "date-fns";
 import { format } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -221,13 +219,6 @@ export default function SettingsPage() {
       slotStartDates: pendingSlotStartDates,
     });
   };
-
-  const { data: loginHistory = [] } = useQuery({
-    queryKey: ["login_history", user?.id],
-    queryFn: () => auditService.getLoginHistory(user!.id, 5),
-    enabled: !!user?.id,
-    staleTime: 60000,
-  });
 
   const { data: notifPrefsData } = useQuery({
     queryKey: ["notif_prefs", user?.id],
@@ -990,47 +981,7 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
 
-      {/* ── 4. Login History (compact) ─────────────────────────── */}
-      <Card>
-        <CardHeader className="pb-2 pt-4 px-4">
-          <CardTitle className="text-sm flex items-center gap-2">
-            <History className="h-4 w-4" />
-            {t.settings.loginHistory}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="px-4 pb-4">
-          {loginHistory.length === 0 ? (
-            <p className="text-xs text-muted-foreground text-center py-3">{t.noRecords}</p>
-          ) : (
-            <div className="space-y-0">
-              {loginHistory.map((entry, i) => (
-                <div
-                  key={entry.id}
-                  className={cn(
-                    "flex items-center gap-3 py-2",
-                    i < loginHistory.length - 1 && "border-b border-border/50"
-                  )}
-                >
-                  <div className={cn(
-                    "h-7 w-7 rounded-full flex items-center justify-center shrink-0",
-                    entry.action === "login" ? "bg-green-100 text-green-600" : "bg-muted text-muted-foreground"
-                  )}>
-                    <LogIn className="h-3 w-3" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium">
-                      {entry.action === "login" ? t.settings.loginAction : t.settings.logoutAction}
-                    </p>
-                  </div>
-                  <p className="text-[10px] text-muted-foreground whitespace-nowrap">
-                    {formatDistanceToNow(new Date(entry.created_at), { addSuffix: true })}
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+
 
       {/* ── 5. App info + Logout ──────────────────────────────── */}
       <Card>
