@@ -248,7 +248,7 @@ export function VacationTab() {
           </DialogHeader>
           <p className="text-sm text-muted-foreground">{t.vacation.deleteDesc}</p>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteId(null)}>{t.cancel}</Button>
+            <Button variant="outline" onClick={() => setDeleteTarget(null)}>{t.cancel}</Button>
             <Button
               variant="destructive"
               onClick={handleDelete}

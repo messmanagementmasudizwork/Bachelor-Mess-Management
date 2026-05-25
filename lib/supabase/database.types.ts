@@ -33,6 +33,12 @@ export interface Database {
           time_format: "12h" | "24h";
           is_banned: boolean;
           notification_preferences: Json;
+          company: string | null;
+          department: string | null;
+          designation: string | null;
+          job_joining_date: string | null;
+          job_id_card_no: string | null;
+          pin_hash: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -52,6 +58,12 @@ export interface Database {
           time_format?: "12h" | "24h";
           is_banned?: boolean;
           notification_preferences?: Json;
+          company?: string | null;
+          department?: string | null;
+          designation?: string | null;
+          job_joining_date?: string | null;
+          job_id_card_no?: string | null;
+          pin_hash?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -70,6 +82,12 @@ export interface Database {
           time_format?: "12h" | "24h";
           is_banned?: boolean;
           notification_preferences?: Json;
+          company?: string | null;
+          department?: string | null;
+          designation?: string | null;
+          job_joining_date?: string | null;
+          job_id_card_no?: string | null;
+          pin_hash?: string | null;
           updated_at?: string;
         };
         Relationships: [];
@@ -224,6 +242,9 @@ export interface Database {
           meal_default_breakfast: boolean;
           meal_default_lunch: boolean;
           meal_default_dinner: boolean;
+          building: string | null;
+          floor_number: string | null;
+          room_number: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -241,6 +262,9 @@ export interface Database {
           meal_default_breakfast?: boolean;
           meal_default_lunch?: boolean;
           meal_default_dinner?: boolean;
+          building?: string | null;
+          floor_number?: string | null;
+          room_number?: string | null;
         };
         Update: {
           role?: "owner" | "admin" | "manager" | "assistant_manager" | "member" | "guest";
@@ -254,6 +278,9 @@ export interface Database {
           meal_default_breakfast?: boolean;
           meal_default_lunch?: boolean;
           meal_default_dinner?: boolean;
+          building?: string | null;
+          floor_number?: string | null;
+          room_number?: string | null;
           updated_at?: string;
           is_current?: boolean;
           end_date?: string | null;
@@ -592,12 +619,55 @@ export interface Database {
       };
 
       // ─── NOTIFICATIONS & COMMUNICATION ───────────────────────
+      admin_notices: {
+        Row: {
+          id: string;
+          mess_id: string;
+          title: string;
+          body: string;
+          notice_type: "notice" | "meeting";
+          publish_at: string | null;
+          is_published: boolean;
+          created_by: string;
+          meeting_at: string | null;
+          expires_at: string | null;
+          reminder_1day_sent: boolean;
+          reminder_30min_sent: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          mess_id: string;
+          title: string;
+          body: string;
+          notice_type?: "notice" | "meeting";
+          publish_at?: string | null;
+          is_published?: boolean;
+          created_by: string;
+          meeting_at?: string | null;
+          expires_at?: string | null;
+          reminder_1day_sent?: boolean;
+          reminder_30min_sent?: boolean;
+        };
+        Update: {
+          title?: string;
+          body?: string;
+          notice_type?: "notice" | "meeting";
+          publish_at?: string | null;
+          is_published?: boolean;
+          meeting_at?: string | null;
+          expires_at?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       notifications: {
         Row: {
           id: string;
           user_id: string;
           mess_id: string | null;
-          type: string;
+          type: "meal_reminder" | "due_reminder" | "expense_added" | "expense_approved" | "deposit_confirmed" | "manager_changed" | "member_joined" | "member_removed" | "month_closed" | "low_balance" | "rule_violation" | "vacation_announced" | "admin_notice" | "system";
           title: string;
           body: string;
           is_read: boolean;
@@ -610,7 +680,7 @@ export interface Database {
           id?: string;
           user_id: string;
           mess_id?: string | null;
-          type: string;
+          type: "meal_reminder" | "due_reminder" | "expense_added" | "expense_approved" | "deposit_confirmed" | "manager_changed" | "member_joined" | "member_removed" | "month_closed" | "low_balance" | "rule_violation" | "vacation_announced" | "admin_notice" | "system";
           title: string;
           body: string;
           is_read?: boolean;
@@ -1434,6 +1504,22 @@ export interface Database {
       generate_invite_code: {
         Args: Record<string, never>;
         Returns: string;
+      };
+      is_action_pin_set: {
+        Args: Record<string, never>;
+        Returns: boolean;
+      };
+      set_action_pin: {
+        Args: { p_pin: string };
+        Returns: undefined;
+      };
+      verify_action_pin: {
+        Args: { p_pin: string };
+        Returns: boolean;
+      };
+      remove_action_pin: {
+        Args: Record<string, never>;
+        Returns: undefined;
       };
     };
 

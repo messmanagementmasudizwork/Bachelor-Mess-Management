@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
       notifications: Array<{
         user_id: string;
         mess_id?: string | null;
-        type: string;
+        type: "meal_reminder" | "due_reminder" | "expense_added" | "expense_approved" | "deposit_confirmed" | "manager_changed" | "member_joined" | "member_removed" | "month_closed" | "low_balance" | "rule_violation" | "vacation_announced" | "admin_notice" | "system";
         title: string;
         body: string;
         action_url?: string | null;

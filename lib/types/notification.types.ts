@@ -25,5 +25,5 @@ export interface Notification extends AuditFields {
   body: string;
   is_read: boolean;
   action_url: string | null;
-  metadata: Record<string, unknown> | null;
+  metadata: unknown;
 }

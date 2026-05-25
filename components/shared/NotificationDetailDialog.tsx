@@ -156,7 +156,8 @@ function MeetingContent({ notification, notice, isLoading, d, locale }: {
 }) {
   const title     = notice?.title ?? notification.title.replace(/^📅 Meeting:\s*/i, "").replace(/^📅 সভা:\s*/i, "");
   const body      = notice?.body  ?? notification.body;
-  const meetingAt = (notice?.meeting_at ?? notification.metadata?.meeting_at) as string | null | undefined;
+  const meta      = notification.metadata as Record<string, unknown> | null | undefined;
+  const meetingAt = (notice?.meeting_at ?? meta?.meeting_at) as string | null | undefined;
 
   let statusBadge: React.ReactNode = null;
   if (meetingAt) {
@@ -394,11 +395,12 @@ export function NotificationDetailDialog({ notification, onClose }: Props) {
   const locale      = lang === "bn" ? "bn-BD" : "en-GB";
   const d           = t.notifications.detail as DetailT;
 
+  const meta_      = notification?.metadata as Record<string, unknown> | null | undefined;
   const noticeId   = notification?.type === "admin_notice"
-    ? (notification.metadata?.notice_id as string | undefined)
+    ? (meta_?.notice_id as string | undefined)
     : undefined;
   const vacationId = notification?.type === "vacation_announced"
-    ? (notification.metadata?.vacation_id as string | undefined)
+    ? (meta_?.vacation_id as string | undefined)
     : undefined;
 
   const { data: notice,   isLoading: noticeLoading   } = useAdminNoticeById(noticeId);
@@ -406,8 +408,9 @@ export function NotificationDetailDialog({ notification, onClose }: Props) {
 
   if (!notification) return null;
 
+  const meta__        = notification.metadata as Record<string, unknown> | null | undefined;
   const noticeSubType: string =
-    (notification.metadata?.notice_type as string) ??
+    (meta__?.notice_type as string) ??
     (notification.title.startsWith("📅") ? "meeting" : "notice");
 
   function renderContent() {
