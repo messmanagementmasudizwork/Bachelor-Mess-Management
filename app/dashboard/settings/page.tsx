@@ -479,7 +479,7 @@ export default function SettingsPage() {
                 <p className="font-semibold">{user?.user_metadata?.full_name ?? t.settings.noName}</p>
                 <p className="text-sm text-muted-foreground">{user?.email}</p>
                 {myMembership && (
-                  <Badge variant="secondary" className="mt-1 text-xs">
+                  <Badge variant="secondary" className="mt-1 text-xs font-bold">
                     {getRoleDisplayNameBn(myMembership.role as MemberRole)}
                   </Badge>
                 )}
