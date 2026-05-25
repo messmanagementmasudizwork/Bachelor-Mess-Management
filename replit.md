@@ -369,6 +369,7 @@ finally { await client.end(); }
 | `029_notice_expiry.sql` | 2026-05-24 | `expires_at` column on `admin_notices` + `auto_expire_meetings()` pg_cron hourly job |
 | `030_add_admin_notice_type.sql` | 2026-05-24 | Add `admin_notice` to `notification_type` ENUM — fixes notice/meeting bell notifications |
 | `031_profile_work_room_fields.sql` | 2026-05-24 | Add `company`, `department`, `designation`, `job_joining_date`, `job_id_card_no` to `profiles`; add `building`, `floor_number`, `room_number` to `mess_members` |
+| `007_storage_buckets.sql` (re-run) | 2026-05-25 | Created 4 storage buckets (`avatars`, `mess-logos`, `receipts`, `media`) + 14 RLS policies — was missing, causing "Bucket not found" on photo upload |
 
 ## Running the App
 
