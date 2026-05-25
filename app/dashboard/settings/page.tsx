@@ -738,29 +738,28 @@ export default function SettingsPage() {
             <div className="rounded-xl border bg-muted/20 p-3 flex flex-col gap-2
                             lg:col-start-2 lg:row-start-2">
               <SectionLabel icon={<Banknote className="h-3.5 w-3.5" />} label={t.settingsExt.currencyLabel} />
-              <div className="grid grid-cols-3 gap-2 flex-1 content-start">
-                {currencyOptions.map(({ value, label, preview }) => (
-                  <button
-                    key={value}
-                    onClick={() => {
-                      setCurrencySymbol(value);
-                      toast.success(t.settingsExt.currencyChanged);
-                      if (user?.id) {
-                        authService.updateUiPreferences(user.id, { currency_symbol: value }).catch(() => {});
-                      }
-                    }}
-                    className={cn(
-                      "flex flex-col items-center gap-1 py-3 rounded-xl border-2 transition-all",
-                      currencySymbol === value
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border hover:bg-muted/50 text-muted-foreground"
-                    )}
-                  >
-                    <span className="text-base font-bold">{label}</span>
-                    <span className="text-[10px] opacity-70">{preview}</span>
-                  </button>
-                ))}
-              </div>
+              <Select
+                value={currencySymbol}
+                onValueChange={(value) => {
+                  setCurrencySymbol(value as CurrencySymbol);
+                  toast.success(t.settingsExt.currencyChanged);
+                  if (user?.id) {
+                    authService.updateUiPreferences(user.id, { currency_symbol: value as CurrencySymbol }).catch(() => {});
+                  }
+                }}
+              >
+                <SelectTrigger className="h-9 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {currencyOptions.map(({ value, label, preview }) => (
+                    <SelectItem key={value} value={value} className="text-xs">
+                      <span className="font-bold">{label}</span>
+                      <span className="ml-2 text-muted-foreground">{preview}</span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* ── Recurring Meal Defaults — lg: col 3, row 1-2 (span 2 rows) ── */}
