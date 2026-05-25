@@ -681,58 +681,55 @@ export default function SettingsPage() {
             <div className="rounded-xl border bg-muted/20 p-3 flex flex-col gap-2
                             lg:col-start-1 lg:row-start-2">
               <SectionLabel icon={<Calendar className="h-3.5 w-3.5" />} label={t.settingsExt.dateTimeSection} />
-              <div className="grid grid-cols-2 gap-3 flex-1 content-start">
+              <div className="flex flex-col gap-3">
                 <div>
                   <p className="text-xs text-muted-foreground mb-1.5">{t.settingsExt.dateFormatLabel}</p>
-                  <div className="flex flex-col gap-1.5">
-                    {datePreviewOptions.map(({ value, example }) => (
-                      <button
-                        key={value}
-                        onClick={() => {
-                          setDateFormat(value);
-                          toast.success(t.settingsExt.dateFormatChanged);
-                          if (user?.id) {
-                            authService.updateUiPreferences(user.id, { date_format: value }).catch(() => {});
-                          }
-                        }}
-                        className={cn(
-                          "flex items-center justify-between px-2 py-1.5 rounded-lg border-2 text-xs font-medium transition-all text-left",
-                          dateFormat === value
-                            ? "border-primary bg-primary/10 text-primary"
-                            : "border-border hover:bg-muted/50 text-muted-foreground"
-                        )}
-                      >
-                        <span className="font-mono truncate">{example}</span>
-                        {dateFormat === value && <span className="text-[10px] bg-primary/20 text-primary px-1 py-0.5 rounded-full shrink-0">✓</span>}
-                      </button>
-                    ))}
-                  </div>
+                  <Select
+                    value={dateFormat}
+                    onValueChange={(value) => {
+                      setDateFormat(value as typeof dateFormat);
+                      toast.success(t.settingsExt.dateFormatChanged);
+                      if (user?.id) {
+                        authService.updateUiPreferences(user.id, { date_format: value as typeof dateFormat }).catch(() => {});
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="h-9 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {datePreviewOptions.map(({ value, example }) => (
+                        <SelectItem key={value} value={value} className="text-xs font-mono">
+                          {example}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground mb-1.5">{t.settingsExt.timeFormatLabel}</p>
-                  <div className="flex flex-col gap-1.5">
-                    {timeOptions.map(({ value, label, example }) => (
-                      <button
-                        key={value}
-                        onClick={() => {
-                          setTimeFormat(value);
-                          toast.success(t.settingsExt.timeFormatChanged);
-                          if (user?.id) {
-                            authService.updateUiPreferences(user.id, { time_format: value }).catch(() => {});
-                          }
-                        }}
-                        className={cn(
-                          "flex items-center justify-between px-2 py-1.5 rounded-lg border-2 text-xs font-medium transition-all",
-                          timeFormat === value
-                            ? "border-primary bg-primary/10 text-primary"
-                            : "border-border hover:bg-muted/50 text-muted-foreground"
-                        )}
-                      >
-                        <span>{label}</span>
-                        <span className="font-mono opacity-70">{example}</span>
-                      </button>
-                    ))}
-                  </div>
+                  <Select
+                    value={timeFormat}
+                    onValueChange={(value) => {
+                      setTimeFormat(value as typeof timeFormat);
+                      toast.success(t.settingsExt.timeFormatChanged);
+                      if (user?.id) {
+                        authService.updateUiPreferences(user.id, { time_format: value as typeof timeFormat }).catch(() => {});
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="h-9 text-xs">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {timeOptions.map(({ value, label, example }) => (
+                        <SelectItem key={value} value={value} className="text-xs">
+                          <span>{label}</span>
+                          <span className="ml-2 font-mono text-muted-foreground">{example}</span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
             </div>
