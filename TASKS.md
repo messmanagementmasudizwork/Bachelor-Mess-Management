@@ -491,14 +491,64 @@
 
 ## PHASE 3 — AI & Automation
 
-### EPIC 19.1: AI Features
-- 🔲 AI assistant chat (Bengali natural language)
-- 🔲 Expense prediction model
-- 🔲 Grocery/bazaar forecasting
-- 🔲 Smart menu suggestions
-- 🔲 Meal trend analysis
-- 🔲 Budget optimization suggestions
-- 🔲 Supabase Vector / pgvector integration
+### EPIC 19.1: AI Assistant Chat (Bengali Natural Language)
+> User Bengali বা English-এ প্রশ্ন করবে, AI real DB data থেকে উত্তর দেবে।
+- 🔲 Replit AI integration setup (API key via Replit secrets, no external key needed)
+- 🔲 `/dashboard/ai-assistant` page — chat UI (message bubbles, Bengali font support)
+- 🔲 `lib/services/ai.service.ts` — AI API call wrapper (system prompt + context injection)
+- 🔲 `lib/hooks/use-ai-chat.ts` — chat state management (messages, loading, error)
+- 🔲 Context builder — injects current mess stats (meal rate, balances, expenses) into AI prompt
+- 🔲 Sample queries: "এই মাসে মোট খরচ কত?", "কার বেশি বকেয়া?", "আজকের meal rate কত?"
+- 🔲 Sidebar + MobileNav nav item (Bot icon, "AI সহকারী")
+- 🔲 i18n keys for AI chat UI (`en.ts` + `bn.ts`)
+
+### EPIC 19.2: Expense Prediction Model
+> গত মাসের data থেকে আগামী মাসের খরচ predict করবে।
+- 🔲 `lib/utils/ai-prediction.ts` — simple linear regression / weighted average (last 3 months)
+- 🔲 Prediction card in reports page — "আনুমানিক আগামী মাস: ৳১৮,৫০০"
+- 🔲 Confidence indicator (low/medium/high based on data consistency)
+- 🔲 Category-wise prediction (bazaar / rent / utility breakdown)
+- 🔲 i18n keys for prediction UI
+
+### EPIC 19.3: Grocery / Bazaar Forecasting
+> Member count + meal count দেখে weekly grocery list suggest করবে।
+- 🔲 `lib/utils/grocery-forecast.ts` — formula-based estimation (চাল 0.25kg/person/meal, etc.)
+- 🔲 AI-enhanced suggestion via AI API (takes member count + weekly menu + history)
+- 🔲 Forecast card in kitchen/bazaar page — item-wise estimated qty + unit
+- 🔲 "বাজারের তালিকা" one-click copy/share
+- 🔲 i18n keys for forecast UI
+
+### EPIC 19.4: Smart Menu Suggestions
+> Budget, season, history দেখে weekly menu suggest করবে।
+- 🔲 `lib/services/ai-menu.service.ts` — calls AI API with budget + member count + past menus
+- 🔲 "AI সাজেশন" button in menu page — generates 7-day menu with estimated cost
+- 🔲 Accept/reject per suggestion (saves to menus table if accepted)
+- 🔲 Budget constraint enforcement (stays within `weekly_menu_budget`)
+- 🔲 i18n keys for menu suggestion UI
+
+### EPIC 19.5: Meal Trend Analysis
+> Member-wise ও mess-wide meal pattern বিশ্লেষণ।
+- 🔲 `lib/utils/meal-trends.ts` — compute per-member meal frequency, peak days, skipped days
+- 🔲 Trend chart in meals/analytics tab — "সবচেয়ে বেশি meal নেওয়া দিন: শুক্রবার"
+- 🔲 Member meal consistency score (%) — "আপনি এই মাসে ৮৭% দিন lunch নিয়েছেন"
+- 🔲 Absence pattern alert — "৩ দিন ধরে meal নেননি" notification trigger
+- 🔲 i18n keys for trend UI
+
+### EPIC 19.6: Budget Optimization Suggestions
+> Expense pattern দেখে actionable cost-saving advice দেবে।
+- 🔲 `lib/services/ai-budget.service.ts` — calls AI API with 3-month expense history
+- 🔲 Insights card in reports page — "Bazaar খরচ গত মাসের চেয়ে ২৩% বেশি"
+- 🔲 Category overspend alert (threshold: >15% above 3-month average)
+- 🔲 Saving suggestion text (AI-generated, Bengali)
+- 🔲 i18n keys for budget insights UI
+
+### EPIC 19.7: pgvector / Semantic Search (Advanced)
+> Receipts, notices, expenses — semantic search করা যাবে।
+- 🔲 Supabase pgvector extension enable করা
+- 🔲 `supabase/migrations/035_pgvector.sql` — vector column on expenses/notices
+- 🔲 Embedding generation on create (Edge Function)
+- 🔲 Search UI in expenses/notices page with natural language query
+- 🔲 i18n keys for search UI
 
 ---
 
@@ -584,7 +634,7 @@
 | Phase 1 — Settings | 7 | ✅ 7 | 0 |
 | Phase 2 — Advanced Core | 42 | ✅ 42 | 0 |
 | Phase 2 — Supabase Advanced | 22 | ✅ 22 | 0 |
-| Phase 3 — AI & Offline | 12 | ✅ 0 | 🔲 12 (future phase) |
+| Phase 3 — AI & Offline | 35 | ✅ 0 | 🔲 35 (7 EPICs, detailed tasks added) |
 | Phase 4 — SaaS & Scaling | 18 | ✅ 13 | 🔲 5 (subscription billing, support tickets, Tests, DevOps) |
 | **TOTAL** | **~269** | **~260** | **~9** (Phase 3 AI/Offline, billing, testing, DevOps)
 
