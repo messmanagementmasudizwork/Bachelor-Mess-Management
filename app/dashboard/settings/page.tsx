@@ -28,7 +28,7 @@ import { useApplyDefaultsToMonth } from "@/lib/hooks/use-meals";
 import { useMess } from "@/lib/hooks/use-mess";
 import { useMessStore } from "@/lib/stores/mess.store";
 import { usePreferences } from "@/lib/hooks/use-preferences";
-import type { CurrencySymbol, DateFormatPref, TimeFormatPref } from "@/lib/stores/preferences.store";
+import type { CurrencySymbol, DateFormatPref, TimeFormatPref, NumberFormatPref } from "@/lib/stores/preferences.store";
 import { usePreferencesStore } from "@/lib/stores/preferences.store";
 import { authService } from "@/lib/services/auth.service";
 import { storageService } from "@/lib/services/storage.service";
@@ -78,7 +78,8 @@ export default function SettingsPage() {
   const { lang, setLang, t } = useLanguage();
   const {
     currencySymbol, dateFormat, timeFormat,
-    setCurrencySymbol, setDateFormat, setTimeFormat,
+    setCurrencySymbol, setDateFormat, setTimeFormat, setNumberFormat,
+    numberFormat,
   } = usePreferences();
   const hydratePreferences = usePreferencesStore((s) => s.hydrate);
 
@@ -407,6 +408,16 @@ export default function SettingsPage() {
     { value: "Tk",  label: "Tk",  preview: "Tk 1,250",  symbolCls: "text-sm font-bold leading-none"               },
     { value: "BDT", label: "BDT", preview: "BDT 1,250", symbolCls: "text-sm font-bold leading-none"               },
   ];
+
+  const numberFormatOptions: { value: NumberFormatPref; label: string; example: string }[] = [
+    { value: "international", label: "International", example: "1,23,456 → 123,456" },
+    { value: "south-asian",   label: "South Asian",   example: "1,23,456 (BD style)" },
+  ];
+
+  const livePreviewAmount = numberFormat === "south-asian" ? "1,23,456" : "123,456";
+  const livePreviewText = currencySymbol === "BDT"
+    ? `BDT ${livePreviewAmount}`
+    : `${currencySymbol}${livePreviewAmount}`;
 
   const timeOptions: { value: TimeFormatPref; label: string; example: string }[] = [
     { value: "12h", label: t.settingsExt.time12h, example: format(new Date(), "hh:mm a") },
@@ -770,6 +781,41 @@ export default function SettingsPage() {
                   ))}
                 </SelectContent>
               </Select>
+
+              {/* Number Format */}
+              <div>
+                <p className="text-xs text-muted-foreground mb-1.5">Number Format</p>
+                <Select
+                  value={numberFormat}
+                  onValueChange={(value) => setNumberFormat(value as NumberFormatPref)}
+                >
+                  <SelectTrigger className="h-9 text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {numberFormatOptions.map(({ value, label, example }) => (
+                      <SelectItem key={value} value={value} className="text-xs">
+                        <span className="font-medium">{label}</span>
+                        <span className="ml-2 text-muted-foreground">{example}</span>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Live Preview */}
+              <div className="mt-auto pt-1">
+                <p className="text-xs text-muted-foreground mb-1.5">Preview</p>
+                <div className="rounded-lg border bg-muted/30 px-3 py-2.5 flex items-center justify-between">
+                  <span className="text-xs text-muted-foreground">Sample amount</span>
+                  <span className={cn(
+                    "font-bold text-sm tabular-nums",
+                    currencySymbol === "৳" ? "font-bengali" : ""
+                  )}>
+                    {livePreviewText}
+                  </span>
+                </div>
+              </div>
             </div>
 
             {/* ── Recurring Meal Defaults — lg: col 3, row 1-2 (span 2 rows) ── */}
