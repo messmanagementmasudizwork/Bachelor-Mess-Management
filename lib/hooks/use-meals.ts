@@ -123,9 +123,13 @@ export function useApplyDefaultsToMonth() {
           memberId,
           {
             date: today,
-            breakfast: slotStartDates.breakfast === today ? defaults.breakfast : (existing?.breakfast ?? defaults.breakfast),
-            lunch:     slotStartDates.lunch     === today ? defaults.lunch     : (existing?.lunch     ?? defaults.lunch),
-            dinner:    slotStartDates.dinner    === today ? defaults.dinner    : (existing?.dinner    ?? defaults.dinner),
+            // Unlocked slot (starts today)  → apply new default
+            // Locked slot   (starts tomorrow) → preserve existing value;
+            //   if no entry yet, fall back to DB default (true) — NOT the new default,
+            //   because cutoff has already passed for this slot today.
+            breakfast: slotStartDates.breakfast === today ? defaults.breakfast : (existing?.breakfast ?? true),
+            lunch:     slotStartDates.lunch     === today ? defaults.lunch     : (existing?.lunch     ?? true),
+            dinner:    slotStartDates.dinner    === today ? defaults.dinner    : (existing?.dinner    ?? true),
           },
           user!.id
         );
