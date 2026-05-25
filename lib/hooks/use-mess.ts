@@ -56,7 +56,7 @@ export function useCreateMess() {
         role: "owner",
         avatar_url: null,
         is_month_closed: false,
-        settings: mess.settings as unknown as import("@/lib/types/mess.types").MessSettings ?? null,
+        settings: null,
       });
       toast.success(getT().toasts.messCreated);
     },

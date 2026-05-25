@@ -14,7 +14,7 @@ function restoreMessInBackground(userId: string) {
     .then((messes) => {
       if (!messes || messes.length === 0) return;
       const first = messes[0];
-      const mess = first?.mess as { id: string; name: string; avatar_url?: string | null; is_month_closed?: boolean; settings?: Record<string, unknown> | null } | null;
+      const mess = first?.mess as { id: string; name: string; avatar_url?: string | null; is_month_closed?: boolean; mess_settings?: Record<string, unknown> | null } | null;
       if (!mess) return;
       setActiveMess({
         id: mess.id,
@@ -22,7 +22,7 @@ function restoreMessInBackground(userId: string) {
         role: first.role,
         avatar_url: mess.avatar_url ?? null,
         is_month_closed: mess.is_month_closed ?? false,
-        settings: mess.settings as unknown as import("@/lib/types/mess.types").MessSettings ?? null,
+        settings: mess.mess_settings as unknown as import("@/lib/types/mess.types").MessSettings ?? null,
       });
     })
     .catch(() => {});

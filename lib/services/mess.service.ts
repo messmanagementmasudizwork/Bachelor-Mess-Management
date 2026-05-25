@@ -59,7 +59,6 @@ export const messService = {
         description: input.description ?? null,
         owner_id: userId,
         invite_code: inviteCode,
-        settings: defaultSettings,
         current_month: getCurrentMonthString(),
         created_by: userId,
       })
@@ -131,7 +130,8 @@ export const messService = {
         mess:messes(
           id, name, address, mess_type, status, owner_id,
           invite_code, seat_capacity, avatar_url, current_month,
-          is_month_closed, settings, created_at
+          is_month_closed, created_at,
+          mess_settings(*)
         )
       `)
       .eq("user_id", userId)

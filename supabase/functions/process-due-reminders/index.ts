@@ -19,16 +19,16 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Get all active messes
+    // Get all active messes with their settings from mess_settings table
     const { data: messes } = await supabase
       .from("messes")
-      .select("id, name, settings");
+      .select("id, name, mess_settings(due_reminder_days)");
 
     let totalNotifications = 0;
 
     for (const mess of messes ?? []) {
-      const settings = (mess.settings ?? {}) as Record<string, any>;
-      const reminderDays: number[] = settings.due_reminder_days ?? [7, 3, 1];
+      const ms = (mess as any).mess_settings as { due_reminder_days?: number[] } | null;
+      const reminderDays: number[] = ms?.due_reminder_days ?? [7, 3, 1];
       const month = new Date().toISOString().slice(0, 7);
 
       // Get active members

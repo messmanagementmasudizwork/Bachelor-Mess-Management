@@ -32,22 +32,22 @@ serve(async (req) => {
       });
     }
 
-    // Mark month as frozen in mess settings
-    const { data: mess, error: fetchError } = await supabase
-      .from("messes")
-      .select("settings")
-      .eq("id", mess_id)
+    // Read frozen_months from mess_settings table
+    const { data: ms, error: fetchError } = await supabase
+      .from("mess_settings")
+      .select("frozen_months")
+      .eq("mess_id", mess_id)
       .single();
     if (fetchError) throw new Error(fetchError.message);
 
-    const currentSettings = (mess?.settings ?? {}) as Record<string, unknown>;
-    const frozenMonths: string[] = (currentSettings.frozen_months as string[] | undefined) ?? [];
+    const frozenMonths: string[] = (ms?.frozen_months as string[] | null) ?? [];
     if (!frozenMonths.includes(month)) frozenMonths.push(month);
 
+    // Write frozen_months back to mess_settings table
     const { error: updateError } = await supabase
-      .from("messes")
-      .update({ settings: { ...currentSettings, frozen_months: frozenMonths } })
-      .eq("id", mess_id);
+      .from("mess_settings")
+      .update({ frozen_months: frozenMonths, updated_at: new Date().toISOString() })
+      .eq("mess_id", mess_id);
     if (updateError) throw new Error(updateError.message);
 
     // Notify all active members
@@ -72,8 +72,8 @@ serve(async (req) => {
     }
 
     return new Response(JSON.stringify({ success: true, month, frozen_months: frozenMonths }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
+      headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
   } catch (err: any) {
     return new Response(JSON.stringify({ error: err.message }), {
       status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },

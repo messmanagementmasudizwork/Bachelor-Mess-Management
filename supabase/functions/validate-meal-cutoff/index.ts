@@ -25,35 +25,45 @@ serve(async (req) => {
       });
     }
 
-    // Get mess settings
-    const { data: mess, error } = await supabase
-      .from("messes")
-      .select("settings")
-      .eq("id", mess_id)
+    // Get settings from dedicated mess_settings table
+    const { data: settings, error } = await supabase
+      .from("mess_settings")
+      .select("cutoff_time_mode, cutoff_single_time, cutoff_days_before, meal_cutoff_breakfast, meal_cutoff_lunch, meal_cutoff_dinner")
+      .eq("mess_id", mess_id)
       .single();
     if (error) throw new Error(error.message);
 
-    const settings = (mess?.settings ?? {}) as Record<string, any>;
     const now = new Date();
     const currentHour = now.getHours();
     const currentMinute = now.getMinutes();
+    const currentMins = currentHour * 60 + currentMinute;
 
-    const CUTOFFS: Record<string, { hour: number; minute: number }> = {
-      breakfast: { hour: settings.breakfast_cutoff_hour ?? 8, minute: 0 },
-      lunch: { hour: settings.lunch_cutoff_hour ?? 12, minute: 0 },
-      dinner: { hour: settings.dinner_cutoff_hour ?? 20, minute: 0 },
-    };
+    const mode = settings?.cutoff_time_mode ?? "per_meal";
+    const daysBefore = settings?.cutoff_days_before ?? 0;
 
-    const cutoff = CUTOFFS[meal_slot];
-    if (!cutoff) {
-      return new Response(JSON.stringify({ error: "invalid meal_slot" }), {
-        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    // Resolve cutoff time for the requested slot
+    let cutoffTime: string;
+    if (mode === "single") {
+      cutoffTime = settings?.cutoff_single_time ?? "22:00";
+    } else {
+      const perMeal: Record<string, string> = {
+        breakfast: settings?.meal_cutoff_breakfast ?? "08:00",
+        lunch:     settings?.meal_cutoff_lunch     ?? "10:00",
+        dinner:    settings?.meal_cutoff_dinner    ?? "16:00",
+      };
+      cutoffTime = perMeal[meal_slot] ?? "22:00";
     }
 
-    const isPastCutoff =
-      currentHour > cutoff.hour ||
-      (currentHour === cutoff.hour && currentMinute >= cutoff.minute);
+    const [cutoffH, cutoffM] = cutoffTime.split(":").map(Number);
+    const cutoffMins = (cutoffH ?? 0) * 60 + (cutoffM ?? 0);
+
+    let isPastCutoff = false;
+    if (daysBefore > 0) {
+      // Advance mode: today is always past cutoff for same-day toggle
+      isPastCutoff = true;
+    } else {
+      isPastCutoff = currentMins >= cutoffMins;
+    }
 
     const BYPASS_ROLES = ["owner", "admin", "manager"];
     const canBypass = override_role && BYPASS_ROLES.includes(override_role);
@@ -62,7 +72,8 @@ serve(async (req) => {
       JSON.stringify({
         allowed: !isPastCutoff || canBypass,
         past_cutoff: isPastCutoff,
-        cutoff_time: `${cutoff.hour.toString().padStart(2, "0")}:${cutoff.minute.toString().padStart(2, "0")}`,
+        cutoff_time: cutoffTime,
+        mode,
         bypassed: isPastCutoff && canBypass,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }

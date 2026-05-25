@@ -32,14 +32,14 @@ export function MessSelector() {
 
   const handleSelectMess = (mess: NonNullable<typeof messes>[number]) => {
     if (!mess.mess) return;
-    const m = mess.mess as { id: string; name: string; avatar_url?: string | null; is_month_closed?: boolean; settings?: Record<string, unknown> | null };
+    const m = mess.mess as { id: string; name: string; avatar_url?: string | null; is_month_closed?: boolean; mess_settings?: Record<string, unknown> | null };
     setActiveMess({
       id: m.id,
       name: m.name,
       role: mess.role,
       avatar_url: m.avatar_url ?? null,
       is_month_closed: m.is_month_closed ?? false,
-      settings: m.settings as unknown as import("@/lib/types/mess.types").MessSettings ?? null,
+      settings: m.mess_settings as unknown as import("@/lib/types/mess.types").MessSettings ?? null,
     });
   };
 
