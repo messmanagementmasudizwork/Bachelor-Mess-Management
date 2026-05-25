@@ -145,12 +145,13 @@ export const authService = {
       .update({ ...updates, updated_at: new Date().toISOString() })
       .eq("id", user.id);
     if (error) throw new Error(error.message);
-    // Also sync avatar_url into Supabase auth user_metadata so
-    // user.user_metadata.avatar_url stays up to date in the UI
-    if ("avatar_url" in updates) {
-      await supabase.auth.updateUser({
-        data: { avatar_url: updates.avatar_url ?? null },
-      });
+    // Sync relevant fields into Supabase auth user_metadata so
+    // user.user_metadata stays up to date in the UI (triggers onAuthStateChange)
+    const metaUpdates: Record<string, unknown> = {};
+    if ("full_name" in updates) metaUpdates.full_name = updates.full_name;
+    if ("avatar_url" in updates) metaUpdates.avatar_url = updates.avatar_url ?? null;
+    if (Object.keys(metaUpdates).length > 0) {
+      await supabase.auth.updateUser({ data: metaUpdates });
     }
   },
 

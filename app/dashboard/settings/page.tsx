@@ -280,6 +280,7 @@ export default function SettingsPage() {
         blood_group: data.blood_group || undefined,
         emergency_contact: data.emergency_contact || undefined,
       });
+      queryClient.invalidateQueries({ queryKey: ["profile", user?.id] });
       toast.success(t.settings.profileSaved);
     } catch (err) {
       toast.error((err as Error).message);
