@@ -129,6 +129,7 @@ export function useSetMemberLeave() {
 }
 
 export function useUpdateMealDefaults() {
+  const { user } = useAuth();
   const { activeMess } = useMessStore();
   const queryClient = useQueryClient();
 
@@ -141,7 +142,9 @@ export function useUpdateMealDefaults() {
       defaults: { meal_default_breakfast?: boolean; meal_default_lunch?: boolean; meal_default_dinner?: boolean };
     }) => memberService.updateMealDefaults(memberId, defaults),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [...MEMBER_KEYS.me(activeMess?.id!, "")] });
+      // Fix: was invalidating with "" as userId — useMyMembership cache was never refreshed
+      queryClient.invalidateQueries({ queryKey: MEMBER_KEYS.me(activeMess?.id!, user?.id!) });
+      queryClient.invalidateQueries({ queryKey: MEMBER_KEYS.list(activeMess?.id!) });
       toast.success(getT().toasts.defaultMealSaved);
     },
     onError: (error: Error) => toast.error(error.message),

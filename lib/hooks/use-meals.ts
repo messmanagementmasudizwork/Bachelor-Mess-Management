@@ -141,12 +141,14 @@ export function useApplyDefaultsToMonth() {
           {
             date,
             // Per-slot logic:
-            //   slot applies & existing is not manually OFF → use new default
-            //   slot applies & existing is manually OFF     → preserve OFF
-            //   slot not yet applicable (locked)            → preserve existing (default true)
-            breakfast: bApply ? (existing?.breakfast === false ? false : defaults.breakfast) : (existing?.breakfast ?? true),
-            lunch:     lApply ? (existing?.lunch     === false ? false : defaults.lunch)     : (existing?.lunch     ?? true),
-            dinner:    dApply ? (existing?.dinner    === false ? false : defaults.dinner)    : (existing?.dinner    ?? true),
+            //   slot applies (date >= slotStart)     → always write new default
+            //   slot locked  (date < slotStart)      → preserve existing value (default true)
+            // Note: vacation dates are skipped entirely above.
+            // We do NOT preserve "false" as manual-OFF because seeded entries from old defaults
+            // are indistinguishable from manual OFFs — always applying the new default is correct.
+            breakfast: bApply ? defaults.breakfast : (existing?.breakfast ?? true),
+            lunch:     lApply ? defaults.lunch     : (existing?.lunch     ?? true),
+            dinner:    dApply ? defaults.dinner    : (existing?.dinner    ?? true),
           },
           user!.id
         );
