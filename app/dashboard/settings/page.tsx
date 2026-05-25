@@ -437,7 +437,7 @@ export default function SettingsPage() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-5">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-stretch">
             {/* Left — avatar + name */}
             <div className="rounded-xl border bg-muted/20 p-3 flex items-center gap-4">
               <ImageUpload
