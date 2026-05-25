@@ -607,95 +607,96 @@ export default function SettingsPage() {
 
           <Separator />
 
-          {/* Date & Time */}
-          <div>
-            <SectionLabel icon={<Calendar className="h-3.5 w-3.5" />} label={t.settingsExt.dateTimeSection} />
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Date format */}
-              <div>
-                <p className="text-xs text-muted-foreground mb-1.5">{t.settingsExt.dateFormatLabel}</p>
-                <div className="flex flex-col gap-1.5">
-                  {datePreviewOptions.map(({ value, example }) => (
-                    <button
-                      key={value}
-                      onClick={() => {
-                        setDateFormat(value);
-                        toast.success(t.settingsExt.dateFormatChanged);
-                        if (user?.id) {
-                          authService.updateUiPreferences(user.id, { date_format: value }).catch(() => {});
-                        }
-                      }}
-                      className={cn(
-                        "flex items-center justify-between px-3 py-2 rounded-lg border-2 text-xs font-medium transition-all text-left",
-                        dateFormat === value
-                          ? "border-primary bg-primary/10 text-primary"
-                          : "border-border hover:bg-muted/50 text-muted-foreground"
-                      )}
-                    >
-                      <span className="font-mono">{example}</span>
-                      {dateFormat === value && <span className="text-[10px] bg-primary/20 text-primary px-1.5 py-0.5 rounded-full">✓</span>}
-                    </button>
-                  ))}
+          {/* Date & Time + Currency Symbol — same row */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Date & Time */}
+            <div>
+              <SectionLabel icon={<Calendar className="h-3.5 w-3.5" />} label={t.settingsExt.dateTimeSection} />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Date format */}
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1.5">{t.settingsExt.dateFormatLabel}</p>
+                  <div className="flex flex-col gap-1.5">
+                    {datePreviewOptions.map(({ value, example }) => (
+                      <button
+                        key={value}
+                        onClick={() => {
+                          setDateFormat(value);
+                          toast.success(t.settingsExt.dateFormatChanged);
+                          if (user?.id) {
+                            authService.updateUiPreferences(user.id, { date_format: value }).catch(() => {});
+                          }
+                        }}
+                        className={cn(
+                          "flex items-center justify-between px-3 py-2 rounded-lg border-2 text-xs font-medium transition-all text-left",
+                          dateFormat === value
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "border-border hover:bg-muted/50 text-muted-foreground"
+                        )}
+                      >
+                        <span className="font-mono">{example}</span>
+                        {dateFormat === value && <span className="text-[10px] bg-primary/20 text-primary px-1.5 py-0.5 rounded-full">✓</span>}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
 
-              {/* Time format */}
-              <div>
-                <p className="text-xs text-muted-foreground mb-1.5">{t.settingsExt.timeFormatLabel}</p>
-                <div className="flex flex-col gap-1.5">
-                  {timeOptions.map(({ value, label, example }) => (
-                    <button
-                      key={value}
-                      onClick={() => {
-                        setTimeFormat(value);
-                        toast.success(t.settingsExt.timeFormatChanged);
-                        if (user?.id) {
-                          authService.updateUiPreferences(user.id, { time_format: value }).catch(() => {});
-                        }
-                      }}
-                      className={cn(
-                        "flex items-center justify-between px-3 py-2 rounded-lg border-2 text-xs font-medium transition-all",
-                        timeFormat === value
-                          ? "border-primary bg-primary/10 text-primary"
-                          : "border-border hover:bg-muted/50 text-muted-foreground"
-                      )}
-                    >
-                      <span>{label}</span>
-                      <span className="font-mono opacity-70">{example}</span>
-                    </button>
-                  ))}
+                {/* Time format */}
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1.5">{t.settingsExt.timeFormatLabel}</p>
+                  <div className="flex flex-col gap-1.5">
+                    {timeOptions.map(({ value, label, example }) => (
+                      <button
+                        key={value}
+                        onClick={() => {
+                          setTimeFormat(value);
+                          toast.success(t.settingsExt.timeFormatChanged);
+                          if (user?.id) {
+                            authService.updateUiPreferences(user.id, { time_format: value }).catch(() => {});
+                          }
+                        }}
+                        className={cn(
+                          "flex items-center justify-between px-3 py-2 rounded-lg border-2 text-xs font-medium transition-all",
+                          timeFormat === value
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "border-border hover:bg-muted/50 text-muted-foreground"
+                        )}
+                      >
+                        <span>{label}</span>
+                        <span className="font-mono opacity-70">{example}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
 
-          <Separator />
-
-          {/* Currency symbol */}
-          <div>
-            <SectionLabel icon={<Banknote className="h-3.5 w-3.5" />} label={t.settingsExt.currencyLabel} />
-            <div className="grid grid-cols-3 gap-2">
-              {currencyOptions.map(({ value, label, preview }) => (
-                <button
-                  key={value}
-                  onClick={() => {
-                    setCurrencySymbol(value);
-                    toast.success(t.settingsExt.currencyChanged);
-                    if (user?.id) {
-                      authService.updateUiPreferences(user.id, { currency_symbol: value }).catch(() => {});
-                    }
-                  }}
-                  className={cn(
-                    "flex flex-col items-center gap-1 py-3 rounded-xl border-2 transition-all",
-                    currencySymbol === value
-                      ? "border-primary bg-primary/10 text-primary"
-                      : "border-border hover:bg-muted/50 text-muted-foreground"
-                  )}
-                >
-                  <span className="text-base font-bold">{label}</span>
-                  <span className="text-[10px] opacity-70">{preview}</span>
-                </button>
-              ))}
+            {/* Currency symbol */}
+            <div>
+              <SectionLabel icon={<Banknote className="h-3.5 w-3.5" />} label={t.settingsExt.currencyLabel} />
+              <div className="grid grid-cols-3 gap-2">
+                {currencyOptions.map(({ value, label, preview }) => (
+                  <button
+                    key={value}
+                    onClick={() => {
+                      setCurrencySymbol(value);
+                      toast.success(t.settingsExt.currencyChanged);
+                      if (user?.id) {
+                        authService.updateUiPreferences(user.id, { currency_symbol: value }).catch(() => {});
+                      }
+                    }}
+                    className={cn(
+                      "flex flex-col items-center gap-1 py-3 rounded-xl border-2 transition-all",
+                      currencySymbol === value
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border hover:bg-muted/50 text-muted-foreground"
+                    )}
+                  >
+                    <span className="text-base font-bold">{label}</span>
+                    <span className="text-[10px] opacity-70">{preview}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
 
