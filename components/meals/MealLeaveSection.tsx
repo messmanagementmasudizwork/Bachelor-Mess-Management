@@ -23,6 +23,7 @@ import { getDatesInRange, addDays } from "@/lib/utils/date-range";
 import { useLanguage } from "@/lib/hooks/use-language";
 import { cn } from "@/lib/utils";
 import { useMarkOpenLeave, useClearOpenLeave } from "@/lib/hooks/use-reactivation";
+import { useVacations } from "@/lib/hooks/use-vacation";
 import { useQueryClient } from "@tanstack/react-query";
 import { MEAL_KEYS } from "@/lib/hooks/use-meals";
 import type { MessSettings, MemberRole, UpdateMealInput, MealEntry, AccountStatus } from "@/lib/types";
@@ -59,6 +60,7 @@ export function MealLeaveSection({
   const queryClient = useQueryClient();
   const markOpenLeave = useMarkOpenLeave();
   const clearOpenLeave = useClearOpenLeave();
+  const { data: vacations = [] } = useVacations();
 
   // Block all actions if frozen/banned/closed
   const isAccountBlocked = accountStatus !== "active";
@@ -138,12 +140,28 @@ export function MealLeaveSection({
       return !check.allowed;
     }), [datesInRange, messSettings, joiningDate]);
 
+  const vacationDatesSet = useMemo(() => {
+    const set = new Set<string>();
+    for (const vac of vacations) {
+      for (const d of getDatesInRange(vac.start_date, vac.end_date)) {
+        set.add(d);
+      }
+    }
+    return set;
+  }, [vacations]);
+
+  const vacationDatesInRange = useMemo(() =>
+    datesInRange.filter(d => vacationDatesSet.has(d)),
+    [datesInRange, vacationDatesSet]
+  );
+
   const allowedDates = useMemo(() =>
     datesInRange.filter((date) =>
+      !vacationDatesSet.has(date) &&
       selectedMeals.some(slot =>
         checkMealToggleAllowed(slot, date, "member", messSettings, joiningDate).allowed
       )
-    ), [datesInRange, selectedMeals, messSettings, joiningDate]);
+    ), [datesInRange, selectedMeals, messSettings, joiningDate, vacationDatesSet]);
 
   const willChangeCount = useMemo(() => ({
     on: allowedDates.filter(date => {
@@ -218,7 +236,8 @@ export function MealLeaveSection({
     const total = allowedDates.length;
     setProgress({ done: 0, total: total || 1 });
     let done = 0;
-    const cutoffSkipped = datesInRange.length - allowedDates.length;
+    const vacationSkippedCount = vacationDatesInRange.length;
+    const cutoffSkipped = datesInRange.length - allowedDates.length - vacationSkippedCount;
 
     const ALL_SLOTS: MealSlot[] = ["breakfast", "lunch", "dinner"];
     const slotsChanged: Record<MealSlot, number> = { breakfast: 0, lunch: 0, dinner: 0 };
@@ -274,6 +293,8 @@ export function MealLeaveSection({
         : t.meals.rangeSuccessOn.replace("{done}", String(done));
 
       const descParts = [slotParts.join("  •  ")];
+      if (vacationSkippedCount > 0)
+        descParts.push(t.meals.rangeVacationSkipped.replace("{count}", String(vacationSkippedCount)));
       if (cutoffSkipped > 0)
         descParts.push(t.meals.rangeCutoffSkipped.replace("{count}", String(cutoffSkipped)));
 
@@ -444,6 +465,16 @@ export function MealLeaveSection({
                     <span className="inline-block w-1.5 h-1.5 rounded-full bg-red-500" />
                     {t.meals.rangeWillChangeOff.replace("{count}", String(willChangeCount.off))}
                   </span>
+                </div>
+              )}
+
+              {/* Vacation skip warning */}
+              {vacationDatesInRange.length > 0 && (
+                <div className="flex items-start gap-2 rounded-lg bg-blue-50 border border-blue-200 px-2.5 py-2">
+                  <Info className="h-3.5 w-3.5 text-blue-600 shrink-0 mt-0.5" />
+                  <p className="text-[11px] text-blue-800 leading-relaxed">
+                    {t.meals.rangeVacationWarning.replace("{count}", String(vacationDatesInRange.length))}
+                  </p>
                 </div>
               )}
 

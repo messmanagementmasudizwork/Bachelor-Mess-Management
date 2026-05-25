@@ -340,6 +340,8 @@ const bn = {
     rangeTurnOff: "বন্ধ করুন",
     rangeApplying: "প্রয়োগ হচ্ছে...",
     rangeSuccess: "{done}টি দিন আপডেট হয়েছে, {skipped}টি skip হয়েছে",
+    rangeVacationWarning: "⛱️ আপনার নির্বাচিত রেঞ্জে {count}টি তারিখ মেস ছুটির মধ্যে পড়ে — এগুলো skip হবে",
+    rangeVacationSkipped: "⛱️ {count}টি তারিখ skip — মেস ছুটি",
     rangeSuccessOff: "{done}টি তারিখ meal বন্ধ হয়েছে",
     rangeSuccessOn: "{done}টি তারিখ meal চালু হয়েছে",
     rangeSlotNotSelected: "(নির্বাচিত হয়নি)",

@@ -340,6 +340,8 @@ const en = {
     rangeTurnOff: "Turn OFF",
     rangeApplying: "Applying...",
     rangeSuccess: "{done} days updated, {skipped} skipped",
+    rangeVacationWarning: "⛱️ {count} days in your range are during mess vacation and will be skipped",
+    rangeVacationSkipped: "⛱️ {count} days skipped — mess vacation",
     rangeSuccessOff: "{done} days meal turned off",
     rangeSuccessOn: "{done} days meal turned on",
     rangeSlotNotSelected: "(not selected)",
