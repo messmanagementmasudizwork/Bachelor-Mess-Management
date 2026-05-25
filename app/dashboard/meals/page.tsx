@@ -181,7 +181,9 @@ export default function MealsPage() {
           accountStatus={accountStatus}
           mealDefaults={mealDefaults}
           getMealForDate={getMealForDate}
-          onUpdate={(input) => updateMeal.mutateAsync(input)}
+          onUpdate={(input) =>
+            mealService.upsertMeal(activeMess!.id, myMembership!.id, input, myMembership!.user_id)
+          }
           isPending={updateMeal.isPending}
         />
 

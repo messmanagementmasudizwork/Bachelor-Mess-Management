@@ -23,6 +23,8 @@ import { getDatesInRange, addDays } from "@/lib/utils/date-range";
 import { useLanguage } from "@/lib/hooks/use-language";
 import { cn } from "@/lib/utils";
 import { useMarkOpenLeave, useClearOpenLeave } from "@/lib/hooks/use-reactivation";
+import { useQueryClient } from "@tanstack/react-query";
+import { MEAL_KEYS } from "@/lib/hooks/use-meals";
 import type { MessSettings, MemberRole, UpdateMealInput, MealEntry, AccountStatus } from "@/lib/types";
 
 type MealSlot = "breakfast" | "lunch" | "dinner";
@@ -54,6 +56,7 @@ export function MealLeaveSection({
   const maxLeaveDays = messSettings.max_meal_leave_days ?? 90;
   const allowOpenLeavePresets = messSettings.allow_open_leave_presets ?? true;
 
+  const queryClient = useQueryClient();
   const markOpenLeave = useMarkOpenLeave();
   const clearOpenLeave = useClearOpenLeave();
 
@@ -272,6 +275,9 @@ export function MealLeaveSection({
       const descParts = [slotParts.join("  •  ")];
       if (cutoffSkipped > 0)
         descParts.push(`⏭️ ${cutoffSkipped}টি তারিখ skip — কাটঅফ পেরিয়ে গেছে`);
+
+      // Single invalidation after all updates (not per-update)
+      queryClient.invalidateQueries({ queryKey: MEAL_KEYS.all });
 
       toast.success(title, {
         description: descParts.join("  |  "),
