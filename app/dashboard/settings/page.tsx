@@ -616,13 +616,14 @@ export default function SettingsPage() {
           </CardTitle>
         </CardHeader>
         <CardContent className="p-4">
-          {/* 3×2 grid: col3 spans 2 rows */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 lg:[grid-template-rows:auto_auto]">
+          {/* 3-col × 2-row grid — explicit placement on lg */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 lg:grid-rows-2 gap-3">
 
-            {/* ── Col 1 Row 1 — Theme ── */}
-            <div className="rounded-xl border bg-muted/20 p-3 space-y-2">
+            {/* ── Theme — lg: col 1, row 1 ── */}
+            <div className="rounded-xl border bg-muted/20 p-3 flex flex-col gap-2
+                            lg:col-start-1 lg:row-start-1">
               <SectionLabel icon={<Sun className="h-3.5 w-3.5" />} label={t.settings.theme} />
-              <div className="grid grid-cols-3 gap-1.5">
+              <div className="grid grid-cols-3 gap-1.5 flex-1 content-start">
                 {[
                   { value: "light",  label: t.settings.themeLight,  icon: Sun     },
                   { value: "dark",   label: t.settings.themeDark,   icon: Moon    },
@@ -650,10 +651,11 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            {/* ── Col 2 Row 1 — Language ── */}
-            <div className="rounded-xl border bg-muted/20 p-3 space-y-2">
+            {/* ── Language — lg: col 2, row 1 ── */}
+            <div className="rounded-xl border bg-muted/20 p-3 flex flex-col gap-2
+                            lg:col-start-2 lg:row-start-1">
               <SectionLabel icon={<Globe className="h-3.5 w-3.5" />} label={t.settings.language} />
-              <div className="grid grid-cols-2 gap-1.5">
+              <div className="grid grid-cols-2 gap-1.5 flex-1 content-start">
                 {[
                   { value: "bn" as const, label: "বাংলা",   sub: "Bengali"  },
                   { value: "en" as const, label: "English", sub: "ইংরেজি"  },
@@ -675,51 +677,11 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            {/* ── Col 3 Row 1+2 — Recurring Meal Defaults ── */}
-            <div className="rounded-xl border bg-muted/20 p-3 space-y-2 lg:row-span-2 sm:col-span-2 lg:col-span-1">
-              <SectionLabel icon={<Settings2 className="h-3.5 w-3.5" />} label={t.meals.recurringDefaults} />
-              <p className="text-xs text-muted-foreground">{t.meals.applyDefaultsNote}</p>
-              <div className="grid grid-cols-3 gap-2">
-                {[
-                  { key: "breakfast" as const, label: t.meals.breakfastFull, emoji: "🌅" },
-                  { key: "lunch"     as const, label: t.meals.lunchFull,     emoji: "☀️" },
-                  { key: "dinner"    as const, label: t.meals.dinnerFull,    emoji: "🌙" },
-                ].map(({ key, label, emoji }) => (
-                  <div
-                    key={key}
-                    className={cn(
-                      "flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-colors",
-                      mealDefaults[key] ? "border-green-200 bg-green-50/40" : "border-border bg-background"
-                    )}
-                  >
-                    <span className="text-xl">{emoji}</span>
-                    <p className="text-xs font-medium text-center leading-tight">{label}</p>
-                    <Switch
-                      checked={mealDefaults[key]}
-                      onCheckedChange={(v) => setMealDefaults((prev) => ({ ...prev, [key]: v }))}
-                    />
-                  </div>
-                ))}
-              </div>
-              <Button
-                onClick={handleOpenDefaultsDialog}
-                disabled={updateMealDefaults.isPending || applyDefaultsToMonth.isPending || !myMembership?.id}
-                variant="outline"
-                size="sm"
-                className="w-full gap-1.5 mt-1"
-              >
-                <CopyCheck className="h-3.5 w-3.5" />
-                {(updateMealDefaults.isPending || applyDefaultsToMonth.isPending)
-                  ? t.meals.applyingDefaults
-                  : t.meals.applyDefaultsToMonth}
-              </Button>
-            </div>
-
-            {/* ── Col 1 Row 2 — Date & Time ── */}
-            <div className="rounded-xl border bg-muted/20 p-3 space-y-2">
+            {/* ── Date & Time — lg: col 1, row 2 ── */}
+            <div className="rounded-xl border bg-muted/20 p-3 flex flex-col gap-2
+                            lg:col-start-1 lg:row-start-2">
               <SectionLabel icon={<Calendar className="h-3.5 w-3.5" />} label={t.settingsExt.dateTimeSection} />
-              <div className="grid grid-cols-2 gap-3">
-                {/* Date format */}
+              <div className="grid grid-cols-2 gap-3 flex-1 content-start">
                 <div>
                   <p className="text-xs text-muted-foreground mb-1.5">{t.settingsExt.dateFormatLabel}</p>
                   <div className="flex flex-col gap-1.5">
@@ -746,7 +708,6 @@ export default function SettingsPage() {
                     ))}
                   </div>
                 </div>
-                {/* Time format */}
                 <div>
                   <p className="text-xs text-muted-foreground mb-1.5">{t.settingsExt.timeFormatLabel}</p>
                   <div className="flex flex-col gap-1.5">
@@ -776,10 +737,11 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            {/* ── Col 2 Row 2 — Currency Symbol ── */}
-            <div className="rounded-xl border bg-muted/20 p-3 space-y-2">
+            {/* ── Currency Symbol — lg: col 2, row 2 ── */}
+            <div className="rounded-xl border bg-muted/20 p-3 flex flex-col gap-2
+                            lg:col-start-2 lg:row-start-2">
               <SectionLabel icon={<Banknote className="h-3.5 w-3.5" />} label={t.settingsExt.currencyLabel} />
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-2 flex-1 content-start">
                 {currencyOptions.map(({ value, label, preview }) => (
                   <button
                     key={value}
@@ -802,6 +764,48 @@ export default function SettingsPage() {
                   </button>
                 ))}
               </div>
+            </div>
+
+            {/* ── Recurring Meal Defaults — lg: col 3, row 1-2 (span 2 rows) ── */}
+            <div className="rounded-xl border bg-muted/20 p-3 flex flex-col gap-2
+                            lg:col-start-3 lg:row-start-1 lg:row-span-2">
+              <SectionLabel icon={<Settings2 className="h-3.5 w-3.5" />} label={t.meals.recurringDefaults} />
+              <p className="text-xs text-muted-foreground">{t.meals.applyDefaultsNote}</p>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { key: "breakfast" as const, label: t.meals.breakfastFull, emoji: "🌅" },
+                  { key: "lunch"     as const, label: t.meals.lunchFull,     emoji: "☀️" },
+                  { key: "dinner"    as const, label: t.meals.dinnerFull,    emoji: "🌙" },
+                ].map(({ key, label, emoji }) => (
+                  <div
+                    key={key}
+                    className={cn(
+                      "flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-colors",
+                      mealDefaults[key] ? "border-green-200 bg-green-50/40" : "border-border bg-background"
+                    )}
+                  >
+                    <span className="text-xl">{emoji}</span>
+                    <p className="text-xs font-medium text-center leading-tight">{label}</p>
+                    <Switch
+                      checked={mealDefaults[key]}
+                      onCheckedChange={(v) => setMealDefaults((prev) => ({ ...prev, [key]: v }))}
+                    />
+                  </div>
+                ))}
+              </div>
+              <div className="flex-1" />
+              <Button
+                onClick={handleOpenDefaultsDialog}
+                disabled={updateMealDefaults.isPending || applyDefaultsToMonth.isPending || !myMembership?.id}
+                variant="outline"
+                size="sm"
+                className="w-full gap-1.5"
+              >
+                <CopyCheck className="h-3.5 w-3.5" />
+                {(updateMealDefaults.isPending || applyDefaultsToMonth.isPending)
+                  ? t.meals.applyingDefaults
+                  : t.meals.applyDefaultsToMonth}
+              </Button>
             </div>
 
           </div>
