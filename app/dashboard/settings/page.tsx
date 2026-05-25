@@ -402,10 +402,10 @@ export default function SettingsPage() {
     { value: "yyyy-MM-dd",   example: format(new Date(), "yyyy-MM-dd")   },
   ];
 
-  const currencyOptions: { value: CurrencySymbol; label: string; preview: string; fontClass: string }[] = [
-    { value: "৳",   label: "৳",   preview: "৳ 1,250",   fontClass: "font-bengali" },
-    { value: "Tk",  label: "Tk",  preview: "Tk 1,250",  fontClass: ""             },
-    { value: "BDT", label: "BDT", preview: "BDT 1,250", fontClass: ""             },
+  const currencyOptions: { value: CurrencySymbol; label: string; preview: string; symbolCls: string }[] = [
+    { value: "৳",   label: "৳",   preview: "৳ 1,250",   symbolCls: "font-bengali text-xl font-black leading-none"  },
+    { value: "Tk",  label: "Tk",  preview: "Tk 1,250",  symbolCls: "text-base font-bold leading-none"              },
+    { value: "BDT", label: "BDT", preview: "BDT 1,250", symbolCls: "text-base font-bold leading-none"              },
   ];
 
   const timeOptions: { value: TimeFormatPref; label: string; example: string }[] = [
@@ -753,16 +753,16 @@ export default function SettingsPage() {
                     const opt = currencyOptions.find(o => o.value === currencySymbol);
                     return opt ? (
                       <span className="flex items-center gap-1.5">
-                        <span className={cn("font-bold text-base leading-none", opt.fontClass)}>{opt.label}</span>
+                        <span className={opt.symbolCls}>{opt.label}</span>
                         <span className="text-xs text-muted-foreground">1,250</span>
                       </span>
                     ) : <SelectValue />;
                   })()}
                 </SelectTrigger>
                 <SelectContent>
-                  {currencyOptions.map(({ value, label, fontClass }) => (
+                  {currencyOptions.map(({ value, label, symbolCls }) => (
                     <SelectItem key={value} value={value} className="text-xs">
-                      <span className={cn("font-bold text-base leading-none", fontClass)}>{label}</span>
+                      <span className={symbolCls}>{label}</span>
                       <span className="ml-2 text-xs text-muted-foreground">1,250</span>
                     </SelectItem>
                   ))}
