@@ -59,7 +59,7 @@ export function usePushNotification() {
 
       if (mode === "tab_only") {
         setIsSubscribed(true);
-        toast.success("Browser Notification enabled! You will receive notifications while the tab is open.");
+        toast.success(t.toasts.pushBrowserEnabled);
         setIsLoading(false);
         return;
       }
@@ -67,8 +67,8 @@ export function usePushNotification() {
       const subscription = await subscribeToPush();
       if (!subscription) {
         setIsSubscribed(true);
-        toast.success("Tab Notification enabled! You will receive notifications while the app is open.", {
-          description: "For background push, open the app directly in the browser.",
+        toast.success(t.toasts.pushTabEnabled, {
+          description: t.toasts.pushTabEnabledDesc,
           duration: 6000,
         });
         setIsLoading(false);
@@ -83,26 +83,27 @@ export function usePushNotification() {
       });
       if (!res.ok) throw new Error("Subscription save failed");
       setIsSubscribed(true);
-      toast.success("Push Notification enabled! You will receive notifications even when the app is closed.");
+      toast.success(t.toasts.pushFullEnabled);
     } catch (err) {
       console.error("[Push] Enable failed:", err);
-      toast.error("Failed to enable notifications");
+      toast.error(t.toasts.pushEnableFailed);
     } finally {
       setIsLoading(false);
     }
   }, [mode]);
 
   const disablePush = useCallback(async () => {
+    const t = getT();
     setIsLoading(true);
     try {
       await unsubscribeFromPush();
       // Cookies are sent automatically with same-origin fetch — no Bearer token needed
       await fetch("/api/push/subscribe", { method: "DELETE" }).catch(() => {});
       setIsSubscribed(false);
-      toast.success("Notifications disabled");
+      toast.success(t.toasts.pushDisabled);
     } catch (err) {
       console.error("[Push] Disable failed:", err);
-      toast.error("Failed to disable notifications");
+      toast.error(t.toasts.pushDisableFailed);
     } finally {
       setIsLoading(false);
     }

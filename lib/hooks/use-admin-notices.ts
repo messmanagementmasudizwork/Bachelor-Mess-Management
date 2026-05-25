@@ -7,6 +7,7 @@ import {
 import { useMessStore } from "@/lib/stores/mess.store";
 import { useAuthStore } from "@/lib/stores/auth.store";
 import { toast } from "sonner";
+import { getT } from "@/lib/i18n/get-t";
 
 export const ADMIN_NOTICE_KEYS = {
   all:    ["admin_notices"] as const,
@@ -54,7 +55,7 @@ export function useCreateAdminNotice() {
       adminNoticeService.createNotice(activeMess!.id, user!.id, input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ADMIN_NOTICE_KEYS.all });
-      toast.success("Notice published!");
+      toast.success(getT().toasts.noticePublished);
     },
     onError: (error: Error) => toast.error(error.message),
   });
@@ -75,7 +76,7 @@ export function useDeleteAdminNotice() {
     mutationFn: (noticeId: string) => adminNoticeService.deleteNotice(noticeId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ADMIN_NOTICE_KEYS.all });
-      toast.success("Notice deleted.");
+      toast.success(getT().toasts.noticeDeleted);
     },
     onError: (error: Error) => toast.error(error.message),
   });

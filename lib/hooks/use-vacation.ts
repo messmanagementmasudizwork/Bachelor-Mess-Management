@@ -4,6 +4,7 @@ import { vacationService, type CreateVacationInput } from "@/lib/services/vacati
 import { useMessStore } from "@/lib/stores/mess.store";
 import { useAuth } from "./use-auth";
 import { toast } from "sonner";
+import { getT } from "@/lib/i18n/get-t";
 
 export const VACATION_KEYS = {
   all:    ["vacations"] as const,
@@ -49,7 +50,7 @@ export function useCreateVacation() {
       qc.invalidateQueries({ queryKey: VACATION_KEYS.list(activeMess?.id ?? "") });
       qc.invalidateQueries({ queryKey: VACATION_KEYS.active(activeMess?.id ?? "") });
       qc.invalidateQueries({ queryKey: ["meals"] });
-      toast.success("ছুটি ঘোষণা করা হয়েছে এবং সব সদস্যকে জানানো হয়েছে");
+      toast.success(getT().toasts.vacationCreated);
     },
     onError: (err: Error) => toast.error(err.message),
   });
@@ -75,7 +76,7 @@ export function useDeleteVacation() {
       qc.invalidateQueries({ queryKey: VACATION_KEYS.list(activeMess?.id ?? "") });
       qc.invalidateQueries({ queryKey: VACATION_KEYS.active(activeMess?.id ?? "") });
       qc.invalidateQueries({ queryKey: ["meals"] });
-      toast.success("ছুটি বাতিল করা হয়েছে এবং সদস্যদের মিল পুনরায় চালু করা হয়েছে");
+      toast.success(getT().toasts.vacationDeleted);
     },
     onError: (err: Error) => toast.error(err.message),
   });

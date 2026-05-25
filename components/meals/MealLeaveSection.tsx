@@ -250,10 +250,11 @@ export function MealLeaveSection({
       }
 
       // ── Build detailed summary toast ──────────────────────────────────
+      const SLOT_EMOJI: Record<MealSlot, string> = { breakfast: "🌅", lunch: "☀️", dinner: "🌙" };
       const SLOT_LABEL: Record<MealSlot, string> = {
-        breakfast: "🌅 সকাল",
-        lunch:     "☀️ দুপুর",
-        dinner:    "🌙 রাত",
+        breakfast: `${SLOT_EMOJI.breakfast} ${t.meals.breakfast}`,
+        lunch:     `${SLOT_EMOJI.lunch} ${t.meals.lunch}`,
+        dinner:    `${SLOT_EMOJI.dinner} ${t.meals.dinner}`,
       };
 
       const slotsDefaultOff: MealSlot[] = action === "on"
@@ -262,19 +263,19 @@ export function MealLeaveSection({
 
       const slotParts = ALL_SLOTS.map(slot => {
         if (!selectedMeals.includes(slot))
-          return `${SLOT_LABEL[slot]}: — (নির্বাচিত হয়নি)`;
+          return `${SLOT_LABEL[slot]}: — ${t.meals.rangeSlotNotSelected}`;
         if (slotsDefaultOff.includes(slot))
-          return `${SLOT_LABEL[slot]}: ০টি (ডিফল্ট বন্ধ)`;
-        return `${SLOT_LABEL[slot]}: ${slotsChanged[slot]}টি`;
+          return `${SLOT_LABEL[slot]}: ${t.meals.rangeSlotDefaultOff}`;
+        return `${SLOT_LABEL[slot]}: ${t.meals.rangeSlotCount.replace("{count}", String(slotsChanged[slot]))}`;
       });
 
       const title = action === "off"
-        ? `${done}টি তারিখ meal বন্ধ হয়েছে`
-        : `${done}টি তারিখ meal চালু হয়েছে`;
+        ? t.meals.rangeSuccessOff.replace("{done}", String(done))
+        : t.meals.rangeSuccessOn.replace("{done}", String(done));
 
       const descParts = [slotParts.join("  •  ")];
       if (cutoffSkipped > 0)
-        descParts.push(`⏭️ ${cutoffSkipped}টি তারিখ skip — কাটঅফ পেরিয়ে গেছে`);
+        descParts.push(t.meals.rangeCutoffSkipped.replace("{count}", String(cutoffSkipped)));
 
       // Single invalidation after all updates (not per-update)
       queryClient.invalidateQueries({ queryKey: MEAL_KEYS.all });
