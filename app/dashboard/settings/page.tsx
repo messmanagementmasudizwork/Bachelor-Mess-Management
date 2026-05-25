@@ -197,6 +197,15 @@ export default function SettingsPage() {
   const handleConfirmMealDefaults = async () => {
     if (!myMembership?.id || !pendingSlotStartDates) return;
     setShowDefaultsDialog(false);
+
+    // Capture OLD defaults BEFORE updating so applyDefaultsToMonth can distinguish
+    // "seeded OFF from old default" vs "manually turned OFF by user"
+    const previousDefaults = {
+      breakfast: myMembership.meal_default_breakfast ?? true,
+      lunch:     myMembership.meal_default_lunch     ?? true,
+      dinner:    myMembership.meal_default_dinner    ?? true,
+    };
+
     await updateMealDefaults.mutateAsync({
       memberId: myMembership.id,
       defaults: {
@@ -208,6 +217,7 @@ export default function SettingsPage() {
     await applyDefaultsToMonth.mutateAsync({
       memberId: myMembership.id,
       defaults: mealDefaults,
+      previousDefaults,
       slotStartDates: pendingSlotStartDates,
     });
   };
