@@ -807,88 +807,89 @@ export default function SettingsPage() {
         </CardHeader>
         <CardContent className="space-y-4">
 
-          {/* Change Password */}
-          <div>
-            <SectionLabel icon={<Lock className="h-3.5 w-3.5" />} label={t.settings.passwordChange} />
-            <form onSubmit={passwordForm.handleSubmit(onChangePassword)}>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-                <div className="space-y-1.5">
-                  <Label className="text-xs">{t.settings.newPassword}</Label>
-                  <div className="relative">
-                    <Input
-                      type={showNewPw ? "text" : "password"}
-                      {...passwordForm.register("new_password")}
-                      placeholder={t.settings.passwordMinLength}
-                      className="pr-9"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowNewPw(!showNewPw)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                    >
-                      {showNewPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
+          {/* Change Password + Security PIN — same row */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Change Password */}
+            <div>
+              <SectionLabel icon={<Lock className="h-3.5 w-3.5" />} label={t.settings.passwordChange} />
+              <form onSubmit={passwordForm.handleSubmit(onChangePassword)}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">{t.settings.newPassword}</Label>
+                    <div className="relative">
+                      <Input
+                        type={showNewPw ? "text" : "password"}
+                        {...passwordForm.register("new_password")}
+                        placeholder={t.settings.passwordMinLength}
+                        className="pr-9"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowNewPw(!showNewPw)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                      >
+                        {showNewPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
+                    {passwordForm.formState.errors.new_password && (
+                      <p className="text-xs text-destructive">{passwordForm.formState.errors.new_password.message}</p>
+                    )}
                   </div>
-                  {passwordForm.formState.errors.new_password && (
-                    <p className="text-xs text-destructive">{passwordForm.formState.errors.new_password.message}</p>
-                  )}
-                </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs">{t.settings.confirmPassword}</Label>
-                  <div className="relative">
-                    <Input
-                      type={showConfirmPw ? "text" : "password"}
-                      {...passwordForm.register("confirm_password")}
-                      placeholder={t.settings.confirmPasswordPlaceholder}
-                      className="pr-9"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPw(!showConfirmPw)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                    >
-                      {showConfirmPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                    </button>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">{t.settings.confirmPassword}</Label>
+                    <div className="relative">
+                      <Input
+                        type={showConfirmPw ? "text" : "password"}
+                        {...passwordForm.register("confirm_password")}
+                        placeholder={t.settings.confirmPasswordPlaceholder}
+                        className="pr-9"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPw(!showConfirmPw)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                      >
+                        {showConfirmPw ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                    </div>
+                    {passwordForm.formState.errors.confirm_password && (
+                      <p className="text-xs text-destructive">{passwordForm.formState.errors.confirm_password.message}</p>
+                    )}
                   </div>
-                  {passwordForm.formState.errors.confirm_password && (
-                    <p className="text-xs text-destructive">{passwordForm.formState.errors.confirm_password.message}</p>
-                  )}
                 </div>
-              </div>
-              <Button type="submit" disabled={savingPassword} variant="outline" size="sm" className="gap-1.5">
-                <RefreshCw className="h-3.5 w-3.5" />
-                {savingPassword ? t.settings.changingPassword : t.settings.changePassword}
-              </Button>
-            </form>
-          </div>
-
-          <Separator />
-
-          {/* Security PIN */}
-          <div>
-            <SectionLabel icon={<Shield className="h-3.5 w-3.5" />} label={t.settings.securityPin} />
-            <p className="text-xs text-muted-foreground mb-2">{t.settings.pinDesc}</p>
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-sm font-medium">{pinIsSet ? t.settings.pinActive : t.settings.noPinSet}</p>
-              <Badge variant={pinIsSet ? "success" : "secondary"} className="text-xs">
-                {pinIsSet ? `✓ ${t.settings.pinStatus.active}` : t.settings.pinStatus.none}
-              </Badge>
-            </div>
-            <div className="flex gap-2 flex-wrap">
-              {!pinIsSet ? (
-                <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setPinDialogMode("set")}>
-                  <Shield className="h-3.5 w-3.5" /> {t.settings.setPinBtn}
+                <Button type="submit" disabled={savingPassword} variant="outline" size="sm" className="gap-1.5">
+                  <RefreshCw className="h-3.5 w-3.5" />
+                  {savingPassword ? t.settings.changingPassword : t.settings.changePassword}
                 </Button>
-              ) : (
-                <>
-                  <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setPinDialogMode("change")}>
-                    <RefreshCw className="h-3.5 w-3.5" /> {t.settings.changePin}
+              </form>
+            </div>
+
+            {/* Security PIN */}
+            <div>
+              <SectionLabel icon={<Shield className="h-3.5 w-3.5" />} label={t.settings.securityPin} />
+              <p className="text-xs text-muted-foreground mb-2">{t.settings.pinDesc}</p>
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-sm font-medium">{pinIsSet ? t.settings.pinActive : t.settings.noPinSet}</p>
+                <Badge variant={pinIsSet ? "success" : "secondary"} className="text-xs">
+                  {pinIsSet ? `✓ ${t.settings.pinStatus.active}` : t.settings.pinStatus.none}
+                </Badge>
+              </div>
+              <div className="flex gap-2 flex-wrap">
+                {!pinIsSet ? (
+                  <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setPinDialogMode("set")}>
+                    <Shield className="h-3.5 w-3.5" /> {t.settings.setPinBtn}
                   </Button>
-                  <Button size="sm" variant="outline" className="gap-1.5 text-destructive hover:text-destructive" onClick={() => setPinDialogMode("remove")}>
-                    {t.settings.removePin}
-                  </Button>
-                </>
-              )}
+                ) : (
+                  <>
+                    <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setPinDialogMode("change")}>
+                      <RefreshCw className="h-3.5 w-3.5" /> {t.settings.changePin}
+                    </Button>
+                    <Button size="sm" variant="outline" className="gap-1.5 text-destructive hover:text-destructive" onClick={() => setPinDialogMode("remove")}>
+                      {t.settings.removePin}
+                    </Button>
+                  </>
+                )}
+              </div>
             </div>
           </div>
 
