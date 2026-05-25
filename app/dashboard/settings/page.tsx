@@ -382,18 +382,34 @@ export default function SettingsPage() {
               fallbackText={getInitials(user?.user_metadata?.full_name ?? user?.email ?? "U")}
               size="lg"
               onUpload={async (file) => {
-                if (!user?.id) return;
-                const url = await storageService.uploadAvatar(user.id, file);
-                await authService.updateProfile({ avatar_url: url });
-                queryClient.invalidateQueries({ queryKey: ["auth"] });
-                toast.success(t.settings.imageUpdateSuccess);
+                if (!user?.id) {
+                  toast.error("User session not found. Please reload and try again.");
+                  throw new Error("User session not found");
+                }
+                try {
+                  const url = await storageService.uploadAvatar(user.id, file);
+                  await authService.updateProfile({ avatar_url: url });
+                  queryClient.invalidateQueries({ queryKey: ["profile", user.id] });
+                  toast.success(t.settings.imageUpdateSuccess);
+                } catch (err) {
+                  console.error("[PhotoUpload] upload failed:", err);
+                  throw err;
+                }
               }}
               onRemove={async () => {
-                if (!user?.id) return;
-                await storageService.deleteAvatar(user.id);
-                await authService.updateProfile({ avatar_url: null });
-                queryClient.invalidateQueries({ queryKey: ["auth"] });
-                toast.success(t.settings.imageRemoveSuccess ?? "Photo removed");
+                if (!user?.id) {
+                  toast.error("User session not found. Please reload and try again.");
+                  throw new Error("User session not found");
+                }
+                try {
+                  await storageService.deleteAvatar(user.id);
+                  await authService.updateProfile({ avatar_url: null });
+                  queryClient.invalidateQueries({ queryKey: ["profile", user.id] });
+                  toast.success(t.settings.imageRemoveSuccess ?? "Photo removed");
+                } catch (err) {
+                  console.error("[PhotoUpload] remove failed:", err);
+                  throw err;
+                }
               }}
             />
             <div>
