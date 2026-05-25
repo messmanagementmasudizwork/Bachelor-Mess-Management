@@ -617,13 +617,13 @@ export default function SettingsPage() {
         </CardHeader>
         <CardContent className="p-4">
           {/* 3-col × 2-row grid — explicit placement on lg */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 lg:grid-rows-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
 
             {/* ── Theme — lg: col 1, row 1 ── */}
             <div className="rounded-xl border bg-muted/20 p-3 flex flex-col gap-2
                             lg:col-start-1 lg:row-start-1">
               <SectionLabel icon={<Sun className="h-3.5 w-3.5" />} label={t.settings.theme} />
-              <div className="grid grid-cols-3 gap-1.5 flex-1 content-start">
+              <div className="grid grid-cols-3 gap-1.5">
                 {[
                   { value: "light",  label: t.settings.themeLight,  icon: Sun     },
                   { value: "dark",   label: t.settings.themeDark,   icon: Moon    },
@@ -655,7 +655,7 @@ export default function SettingsPage() {
             <div className="rounded-xl border bg-muted/20 p-3 flex flex-col gap-2
                             lg:col-start-2 lg:row-start-1">
               <SectionLabel icon={<Globe className="h-3.5 w-3.5" />} label={t.settings.language} />
-              <div className="grid grid-cols-2 gap-1.5 flex-1 content-start">
+              <div className="grid grid-cols-2 gap-1.5">
                 {[
                   { value: "bn" as const, label: "বাংলা",   sub: "Bengali"  },
                   { value: "en" as const, label: "English", sub: "ইংরেজি"  },
