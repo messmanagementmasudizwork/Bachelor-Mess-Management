@@ -88,14 +88,15 @@ export function ImageUpload({
           "relative group cursor-pointer",
           disabled && "cursor-not-allowed opacity-60"
         )}
-        onClick={() => !disabled && !loading && inputRef.current?.click()}
       >
+        {/* Avatar — scales down on hover to reveal buttons */}
         <Avatar
           className={cn(
             SIZE_MAP[size],
             shape === "square" && "rounded-xl",
-            "transition-opacity"
+            "transition-all duration-300 group-hover:scale-75 group-hover:opacity-60"
           )}
+          onClick={() => !disabled && !loading && inputRef.current?.click()}
         >
           <AvatarImage src={displayUrl ?? undefined} className="object-cover" />
           <AvatarFallback className={cn(
@@ -110,13 +111,34 @@ export function ImageUpload({
           </AvatarFallback>
         </Avatar>
 
+        {/* Buttons overlay — visible on hover */}
         {!disabled && !loading && (
           <div className={cn(
-            "absolute inset-0 flex items-center justify-center",
-            "bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity",
-            shape === "circle" ? "rounded-full" : "rounded-xl"
+            "absolute inset-0 flex flex-col items-center justify-center gap-1",
+            "opacity-0 group-hover:opacity-100 transition-opacity duration-300",
           )}>
-            <Camera className={cn(ICON_SIZE_MAP[size], "text-white")} />
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              className="h-6 text-[10px] px-2 gap-1 shadow"
+              onClick={() => inputRef.current?.click()}
+            >
+              <Upload className="h-2.5 w-2.5" />
+              {displayUrl ? t.imageUpload.change : t.imageUpload.upload}
+            </Button>
+            {displayUrl && onRemove && (
+              <Button
+                type="button"
+                variant="destructive"
+                size="sm"
+                className="h-6 text-[10px] px-2 gap-1 shadow"
+                onClick={handleRemove}
+              >
+                <X className="h-2.5 w-2.5" />
+                {t.imageUpload.remove}
+              </Button>
+            )}
           </div>
         )}
 
@@ -127,34 +149,6 @@ export function ImageUpload({
           )}>
             <Loader2 className={cn(ICON_SIZE_MAP[size], "text-white animate-spin")} />
           </div>
-        )}
-      </div>
-
-      <div className="flex items-center gap-1.5">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className="h-7 text-xs gap-1"
-          disabled={disabled || loading}
-          onClick={() => inputRef.current?.click()}
-        >
-          <Upload className="h-3 w-3" />
-          {displayUrl ? t.imageUpload.change : t.imageUpload.upload}
-        </Button>
-
-        {displayUrl && onRemove && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="h-7 text-xs gap-1 text-destructive hover:text-destructive"
-            disabled={disabled || loading}
-            onClick={handleRemove}
-          >
-            <X className="h-3 w-3" />
-            {t.imageUpload.remove}
-          </Button>
         )}
       </div>
 
