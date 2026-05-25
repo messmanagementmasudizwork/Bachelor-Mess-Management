@@ -475,6 +475,15 @@ export default function SettingsPage() {
                   }
                 }}
               />
+              <div className="text-right pl-[30px] pr-[30px]">
+                <p className="font-semibold">{user?.user_metadata?.full_name ?? t.settings.noName}</p>
+                <p className="text-sm text-muted-foreground">{user?.email}</p>
+                {myMembership && (
+                  <Badge variant="secondary" className="mt-1 text-xs font-bold">
+                    {getRoleDisplayNameBn(myMembership.role as MemberRole)}
+                  </Badge>
+                )}
+              </div>
             </div>
 
             {/* Right — Monthly Summary Widget */}
@@ -491,16 +500,6 @@ export default function SettingsPage() {
 
               return (
                 <div className="rounded-xl border bg-muted/20 p-3 flex flex-col gap-2.5">
-                  {/* Name / email / role — moved from left card */}
-                  <div className="text-center">
-                    <p className="font-semibold">{user?.user_metadata?.full_name ?? t.settings.noName}</p>
-                    <p className="text-sm text-muted-foreground">{user?.email}</p>
-                    {myMembership && (
-                      <Badge variant="secondary" className="mt-1 text-xs font-bold">
-                        {getRoleDisplayNameBn(myMembership.role as MemberRole)}
-                      </Badge>
-                    )}
-                  </div>
                   <p className="text-muted-foreground uppercase tracking-wide font-bold text-center text-[13px] bg-[transparent]">
                     {monthLabel} — {t.settings.monthlySummaryTitle}
                   </p>
