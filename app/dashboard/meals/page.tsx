@@ -1,6 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useMyMeals, useUpdateMeal } from "@/lib/hooks/use-meals";
+import { useMyMeals, useUpdateMeal, MEAL_KEYS } from "@/lib/hooks/use-meals";
+import { useQueryClient } from "@tanstack/react-query";
+import { mealService } from "@/lib/services/meal.service";
 import { useMyMembership } from "@/lib/hooks/use-members";
 import { useMessStore } from "@/lib/stores/mess.store";
 import { useMess } from "@/lib/hooks/use-mess";
@@ -36,10 +38,17 @@ export default function MealsPage() {
   const updateMeal = useUpdateMeal(myMembership?.id);
   const syncViolation = useSyncViolationStatus();
 
+  const queryClient = useQueryClient();
   const messSettings = (mess?.mess_settings ?? {}) as Partial<MessSettings>;
   const myRole = activeMess?.role as import("@/lib/types").MemberRole | undefined;
   const joiningDate = myMembership?.joining_date as string | undefined;
   const maxLeaveDays = messSettings.max_meal_leave_days ?? 90;
+
+  const mealDefaults = {
+    breakfast: myMembership?.meal_default_breakfast ?? true,
+    lunch:     myMembership?.meal_default_lunch     ?? true,
+    dinner:    myMembership?.meal_default_dinner    ?? true,
+  };
 
   const storedAccountStatus = (myMembership?.account_status ?? "active") as AccountStatus;
   const openLeaveStarted = myMembership?.open_leave_started as string | null | undefined;
@@ -59,6 +68,36 @@ export default function MealsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [myMembership?.id, violation.status]);
 
+  // Auto-seed today/tomorrow with member defaults if no entry exists yet
+  useEffect(() => {
+    if (!myMembership?.id || !activeMess?.id || !myMeals || isLoading) return;
+
+    const datesToSeed = [today, tomorrow].filter((date) => {
+      if (myMeals.find((m) => m.date === date)) return false;
+      return (
+        checkMealToggleAllowed("breakfast", date, myRole, messSettings, joiningDate).allowed ||
+        checkMealToggleAllowed("lunch",     date, myRole, messSettings, joiningDate).allowed ||
+        checkMealToggleAllowed("dinner",    date, myRole, messSettings, joiningDate).allowed
+      );
+    });
+
+    if (datesToSeed.length === 0) return;
+
+    const seed = async () => {
+      for (const date of datesToSeed) {
+        await mealService.upsertMeal(
+          activeMess.id,
+          myMembership.id,
+          { date, breakfast: mealDefaults.breakfast, lunch: mealDefaults.lunch, dinner: mealDefaults.dinner },
+          myMembership.user_id
+        );
+      }
+      queryClient.invalidateQueries({ queryKey: MEAL_KEYS.all });
+    };
+    seed().catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [myMembership?.id, activeMess?.id, isLoading]);
+
   const getMealForDate = (date: string) => myMeals?.find((m) => m.date === date);
   const getViewMealForDate = (date: string) => viewMonthMeals?.find((m) => m.date === date);
 
@@ -72,9 +111,9 @@ export default function MealsPage() {
     const meal = getMealForDate(tomorrow);
     await updateMeal.mutateAsync({
       date: tomorrow,
-      breakfast: type === "breakfast" ? !current : (meal?.breakfast ?? true),
-      lunch: type === "lunch" ? !current : (meal?.lunch ?? true),
-      dinner: type === "dinner" ? !current : (meal?.dinner ?? true),
+      breakfast: type === "breakfast" ? !current : (meal?.breakfast ?? mealDefaults.breakfast),
+      lunch:     type === "lunch"     ? !current : (meal?.lunch     ?? mealDefaults.lunch),
+      dinner:    type === "dinner"    ? !current : (meal?.dinner    ?? mealDefaults.dinner),
     });
   };
 
@@ -84,9 +123,9 @@ export default function MealsPage() {
     const next = Math.max(0, current + delta);
     await updateMeal.mutateAsync({
       date: tomorrow,
-      breakfast: meal?.breakfast ?? true,
-      lunch: meal?.lunch ?? true,
-      dinner: meal?.dinner ?? true,
+      breakfast: meal?.breakfast ?? mealDefaults.breakfast,
+      lunch:     meal?.lunch     ?? mealDefaults.lunch,
+      dinner:    meal?.dinner    ?? mealDefaults.dinner,
       guest_breakfast: key === "guest_breakfast" ? next : (meal?.guest_breakfast ?? 0),
       guest_lunch:     key === "guest_lunch"     ? next : (meal?.guest_lunch     ?? 0),
       guest_dinner:    key === "guest_dinner"    ? next : (meal?.guest_dinner    ?? 0),
@@ -107,7 +146,7 @@ export default function MealsPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
 
-        <TodayHeroSection todayMeal={getMealForDate(today)} />
+        <TodayHeroSection todayMeal={getMealForDate(today)} mealDefaults={mealDefaults} />
 
         <TomorrowMealSection
           tomorrowMeal={getMealForDate(tomorrow)}
@@ -119,6 +158,7 @@ export default function MealsPage() {
           onToggle={handleTomorrowToggle}
           onGuestChange={myMembership?.id ? handleGuestChange : undefined}
           isGuestPending={updateMeal.isPending}
+          mealDefaults={mealDefaults}
         />
 
         <MealLeaveSection

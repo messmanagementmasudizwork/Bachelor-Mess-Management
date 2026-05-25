@@ -38,7 +38,12 @@ import { ImageUpload } from "@/components/shared/ImageUpload";
 import { getInitials, cn } from "@/lib/utils";
 import { getRoleDisplayNameBn } from "@/lib/utils/permissions";
 import { toast } from "sonner";
-import type { MemberRole } from "@/lib/types";
+import type { MemberRole, MessSettings } from "@/lib/types";
+import { getTodayString } from "@/lib/utils/date";
+import { checkMealToggleAllowed } from "@/lib/utils/meal-cutoff";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
+} from "@/components/ui/dialog";
 import { useQueryClient } from "@tanstack/react-query";
 import { useTheme } from "next-themes";
 import { useLanguage } from "@/lib/hooks/use-language";
@@ -129,6 +134,10 @@ export default function SettingsPage() {
   const [savingWork, setSavingWork] = useState(false);
   const [savingRoom, setSavingRoom] = useState(false);
   const [pinDialogMode, setPinDialogMode] = useState<"set" | "change" | "remove" | null>(null);
+  const [showDefaultsDialog, setShowDefaultsDialog] = useState(false);
+  const [pendingSlotStartDates, setPendingSlotStartDates] = useState<{
+    breakfast: string; lunch: string; dinner: string;
+  } | null>(null);
   const { isPinSet, refreshPinStatus } = usePinProtection();
   const pinIsSet = isPinSet();
 
@@ -153,8 +162,31 @@ export default function SettingsPage() {
     }
   }, [myMembership?.id]);
 
-  const handleSaveMealDefaults = async () => {
+  const handleOpenDefaultsDialog = () => {
     if (!myMembership?.id) return;
+    const messSettings = (mess?.mess_settings ?? {}) as Partial<MessSettings>;
+    const myRole = activeMess?.role as MemberRole | undefined;
+    const joiningDate = myMembership.joining_date as string | undefined;
+    const today = getTodayString();
+    const tomorrow = new Date(new Date().setDate(new Date().getDate() + 1))
+      .toISOString().split("T")[0]!;
+
+    const getSlotStart = (slot: "breakfast" | "lunch" | "dinner") => {
+      const todayCheck = checkMealToggleAllowed(slot, today, myRole, messSettings, joiningDate);
+      return todayCheck.allowed ? today : tomorrow;
+    };
+
+    setPendingSlotStartDates({
+      breakfast: getSlotStart("breakfast"),
+      lunch:     getSlotStart("lunch"),
+      dinner:    getSlotStart("dinner"),
+    });
+    setShowDefaultsDialog(true);
+  };
+
+  const handleConfirmMealDefaults = async () => {
+    if (!myMembership?.id || !pendingSlotStartDates) return;
+    setShowDefaultsDialog(false);
     await updateMealDefaults.mutateAsync({
       memberId: myMembership.id,
       defaults: {
@@ -163,7 +195,11 @@ export default function SettingsPage() {
         meal_default_dinner: mealDefaults.dinner,
       },
     });
-    await applyDefaultsToMonth.mutateAsync({ memberId: myMembership.id, defaults: mealDefaults });
+    await applyDefaultsToMonth.mutateAsync({
+      memberId: myMembership.id,
+      defaults: mealDefaults,
+      slotStartDates: pendingSlotStartDates,
+    });
   };
 
   const { data: loginHistory = [] } = useQuery({
@@ -753,7 +789,7 @@ export default function SettingsPage() {
               ))}
             </div>
             <Button
-              onClick={handleSaveMealDefaults}
+              onClick={handleOpenDefaultsDialog}
               disabled={updateMealDefaults.isPending || applyDefaultsToMonth.isPending || !myMembership?.id}
               variant="outline"
               size="sm"
@@ -1011,6 +1047,52 @@ export default function SettingsPage() {
           }}
         />
       )}
+
+      <Dialog open={showDefaultsDialog} onOpenChange={setShowDefaultsDialog}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>{t.meals.mealDefaultsScheduleTitle}</DialogTitle>
+            <DialogDescription>{t.meals.mealDefaultsScheduleDesc}</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            {(["breakfast", "lunch", "dinner"] as const).map((slot) => {
+              const labels = { breakfast: "🌅 " + t.meals.breakfast, lunch: "☀️ " + t.meals.lunch, dinner: "🌙 " + t.meals.dinner };
+              const startDate = pendingSlotStartDates?.[slot];
+              const today = getTodayString();
+              const isToday = startDate === today;
+              const isOn = mealDefaults[slot];
+              return (
+                <div key={slot} className="flex items-center justify-between gap-3 p-2.5 rounded-lg bg-muted/40">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="text-sm font-medium">{labels[slot]}</span>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Badge variant={isOn ? "default" : "secondary"} className="text-xs">
+                      {isOn ? t.meals.mealOn : t.meals.mealOff}
+                    </Badge>
+                    <span className="text-xs text-muted-foreground">
+                      {isToday ? t.meals.mealDefaultsFromToday : t.meals.mealDefaultsFromTomorrow}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+            <p className="text-xs text-muted-foreground">{t.meals.mealDefaultsCutoffNote}</p>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" className="flex-1" onClick={() => setShowDefaultsDialog(false)}>
+              {t.cancel}
+            </Button>
+            <Button
+              className="flex-1"
+              onClick={handleConfirmMealDefaults}
+              disabled={updateMealDefaults.isPending || applyDefaultsToMonth.isPending}
+            >
+              {t.meals.mealDefaultsConfirmApply}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

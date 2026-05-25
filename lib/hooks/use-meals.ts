@@ -102,11 +102,36 @@ export function useApplyDefaultsToMonth() {
     mutationFn: async ({
       memberId,
       defaults,
+      slotStartDates,
     }: {
       memberId: string;
       defaults: { breakfast: boolean; lunch: boolean; dinner: boolean };
+      slotStartDates: { breakfast: string; lunch: string; dinner: string };
     }) => {
       const today = getTodayString();
+
+      // Today: merge with existing entry — only override slots whose cutoff hasn't passed
+      const isTodayApplicable =
+        slotStartDates.breakfast === today ||
+        slotStartDates.lunch === today ||
+        slotStartDates.dinner === today;
+
+      if (isTodayApplicable) {
+        const existing = await mealService.getMealForDate(activeMess!.id, memberId, today);
+        await mealService.upsertMeal(
+          activeMess!.id,
+          memberId,
+          {
+            date: today,
+            breakfast: slotStartDates.breakfast === today ? defaults.breakfast : (existing?.breakfast ?? defaults.breakfast),
+            lunch:     slotStartDates.lunch     === today ? defaults.lunch     : (existing?.lunch     ?? defaults.lunch),
+            dinner:    slotStartDates.dinner    === today ? defaults.dinner    : (existing?.dinner    ?? defaults.dinner),
+          },
+          user!.id
+        );
+      }
+
+      // Future dates: apply all defaults
       const futureDays = getDaysInMonth(activeMonth).filter((d) => d > today);
       for (const date of futureDays) {
         await mealService.upsertMeal(

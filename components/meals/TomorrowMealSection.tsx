@@ -96,11 +96,12 @@ interface Props {
   onToggle: (type: "breakfast" | "lunch" | "dinner", current: boolean) => void;
   onGuestChange?: (key: GuestKey, delta: number) => Promise<void>;
   isGuestPending?: boolean;
+  mealDefaults?: { breakfast: boolean; lunch: boolean; dinner: boolean };
 }
 
 export function TomorrowMealSection({
   tomorrowMeal, tomorrow, messSettings, myRole, isPending, joiningDate, onToggle,
-  onGuestChange, isGuestPending,
+  onGuestChange, isGuestPending, mealDefaults,
 }: Props) {
   const { t } = useLanguage();
   const { formatDatePref } = usePreferences();
@@ -163,7 +164,7 @@ export function TomorrowMealSection({
         {/* Meal toggles */}
         <div className="grid grid-cols-3 gap-2">
           {mealTypes.map((type) => {
-            const isOn = tomorrowMeal ? tomorrowMeal[type.key] : true;
+            const isOn = tomorrowMeal ? tomorrowMeal[type.key] : (mealDefaults?.[type.key] ?? true);
             const isVacationOff = !isOn && !!tomorrowMeal?.vacation_id;
             const check = checkMealToggleAllowed(type.key, tomorrow, "member", messSettings, joiningDate);
             const locked = !check.allowed;

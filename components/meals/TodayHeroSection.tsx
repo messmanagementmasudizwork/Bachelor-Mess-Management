@@ -12,9 +12,10 @@ const MEAL_EMOJIS = { breakfast: "🌅", lunch: "☀️", dinner: "🌙" } as co
 
 interface Props {
   todayMeal: MealEntry | undefined;
+  mealDefaults?: { breakfast: boolean; lunch: boolean; dinner: boolean };
 }
 
-export function TodayHeroSection({ todayMeal }: Props) {
+export function TodayHeroSection({ todayMeal, mealDefaults }: Props) {
   const { t } = useLanguage();
   const { formatDatePref } = usePreferences();
   const today = getTodayString();
@@ -29,7 +30,7 @@ export function TodayHeroSection({ todayMeal }: Props) {
     !todayMeal.breakfast && !todayMeal.lunch && !todayMeal.dinner;
 
   const userMealCount = mealTypes.reduce(
-    (sum, mt) => sum + (todayMeal ? (todayMeal[mt.key] ? 1 : 0) : 1),
+    (sum, mt) => sum + (todayMeal ? (todayMeal[mt.key] ? 1 : 0) : ((mealDefaults?.[mt.key] ?? true) ? 1 : 0)),
     0
   );
 
@@ -58,7 +59,7 @@ export function TodayHeroSection({ todayMeal }: Props) {
       <CardContent className="px-4 pb-4">
         <div className="grid grid-cols-3 gap-2">
           {mealTypes.map((type) => {
-            const isOn = todayMeal ? todayMeal[type.key] : true;
+            const isOn = todayMeal ? todayMeal[type.key] : (mealDefaults?.[type.key] ?? true);
             const isVacationOff = !isOn && !!todayMeal?.vacation_id;
 
             return (
