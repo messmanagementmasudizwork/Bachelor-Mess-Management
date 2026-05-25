@@ -475,7 +475,7 @@ export default function SettingsPage() {
                   }
                 }}
               />
-              <div className="text-right">
+              <div className="pl-[30px] pr-[30px] text-right">
                 <p className="font-semibold">{user?.user_metadata?.full_name ?? t.settings.noName}</p>
                 <p className="text-sm text-muted-foreground">{user?.email}</p>
                 {myMembership && (
