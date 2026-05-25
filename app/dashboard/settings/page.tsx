@@ -752,10 +752,9 @@ export default function SettingsPage() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {currencyOptions.map(({ value, label, preview }) => (
-                    <SelectItem key={value} value={value} className="text-xs">
-                      <span className="font-bold">{label}</span>
-                      <span className="ml-2 text-muted-foreground">{preview}</span>
+                  {currencyOptions.map(({ value, preview }) => (
+                    <SelectItem key={value} value={value} className="text-xs font-medium">
+                      {preview}
                     </SelectItem>
                   ))}
                 </SelectContent>
