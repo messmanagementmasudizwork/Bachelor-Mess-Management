@@ -502,7 +502,7 @@ export default function SettingsPage() {
               return (
                 <div className="rounded-xl border bg-muted/20 p-3 flex flex-col gap-2.5">
                   <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">
-                    {monthLabel} — এই মাসের সারসংক্ষেপ
+                    {monthLabel} — {t.settings.monthlySummaryTitle}
                   </p>
                   <div className="grid grid-cols-2 gap-2">
                     {/* Total Meals */}
@@ -511,7 +511,7 @@ export default function SettingsPage() {
                         <Utensils className="h-3.5 w-3.5 text-orange-600 dark:text-orange-400" />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-[10px] text-muted-foreground leading-tight">মোট মিল</p>
+                        <p className="text-[10px] text-muted-foreground leading-tight">{t.settings.totalMeals}</p>
                         {reportLoading ? (
                           <div className="h-4 w-8 bg-muted rounded animate-pulse mt-0.5" />
                         ) : (
@@ -526,7 +526,7 @@ export default function SettingsPage() {
                         <Banknote className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-[10px] text-muted-foreground leading-tight">মিল রেট</p>
+                        <p className="text-[10px] text-muted-foreground leading-tight">{t.settings.mealRate}</p>
                         {reportLoading ? (
                           <div className="h-4 w-12 bg-muted rounded animate-pulse mt-0.5" />
                         ) : (
@@ -541,7 +541,7 @@ export default function SettingsPage() {
                         <CreditCard className="h-3.5 w-3.5 text-purple-600 dark:text-purple-400" />
                       </div>
                       <div className="min-w-0">
-                        <p className="text-[10px] text-muted-foreground leading-tight">জমা দিয়েছি</p>
+                        <p className="text-[10px] text-muted-foreground leading-tight">{t.settings.deposited}</p>
                         {reportLoading ? (
                           <div className="h-4 w-12 bg-muted rounded animate-pulse mt-0.5" />
                         ) : (
@@ -569,7 +569,7 @@ export default function SettingsPage() {
                         }
                       </div>
                       <div className="min-w-0">
-                        <p className="text-[10px] text-muted-foreground leading-tight">ব্যালেন্স</p>
+                        <p className="text-[10px] text-muted-foreground leading-tight">{t.settings.balance}</p>
                         {reportLoading ? (
                           <div className="h-4 w-12 bg-muted rounded animate-pulse mt-0.5" />
                         ) : (

@@ -918,6 +918,11 @@ const bn = {
     seatNumber: "সিট নম্বর",
     saveRoomInfo: "রুম তথ্য সংরক্ষণ",
     roomInfoSaved: "রুম তথ্য আপডেট হয়েছে",
+    monthlySummaryTitle: "এই মাসের সারসংক্ষেপ",
+    totalMeals: "মোট মিল",
+    mealRate: "মিল রেট",
+    deposited: "জমা দিয়েছি",
+    balance: "ব্যালেন্স",
   },
 
   // ── Notifications ─────────────────────────────────────────

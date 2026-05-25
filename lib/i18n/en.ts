@@ -918,6 +918,11 @@ const en = {
     seatNumber: "Seat Number",
     saveRoomInfo: "Save Room Info",
     roomInfoSaved: "Room info updated",
+    monthlySummaryTitle: "This Month's Summary",
+    totalMeals: "Total Meals",
+    mealRate: "Meal Rate",
+    deposited: "Deposited",
+    balance: "Balance",
   },
 
   // ── Notifications ─────────────────────────────────────────
