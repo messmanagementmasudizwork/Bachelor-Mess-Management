@@ -165,7 +165,7 @@ export default function SettingsPage() {
   const handleOpenDefaultsDialog = () => {
     if (!myMembership?.id) return;
     const messSettings = (mess?.mess_settings ?? {}) as Partial<MessSettings>;
-    const myRole = activeMess?.role as MemberRole | undefined;
+    const myRole = undefined as MemberRole | undefined;
     const joiningDate = myMembership.joining_date as string | undefined;
     const today = getTodayString();
     const tomorrow = new Date(new Date().setDate(new Date().getDate() + 1))

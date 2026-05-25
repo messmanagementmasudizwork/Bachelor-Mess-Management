@@ -319,7 +319,7 @@ const bn = {
     mealDefaultsFromToday: "আজ থেকে প্রযোজ্য",
     mealDefaultsFromTomorrow: "আগামীকাল থেকে",
     mealDefaultsCutoffNote: "⚠️ কিছু স্লটের কাটঅফ পার হয়েছে — সেগুলো আগামীকাল থেকে প্রয়োগ হবে।",
-    mealDefaultsVacationNote: "🏖️ ছুটির তারিখগুলো কখনো পরিবর্তন হবে না।",
+    mealDefaultsVacationNote: "🏖️ ছুটির তারিখ ও ম্যানুয়ালি বন্ধ করা মিলগুলো কখনো পরিবর্তন হবে না।",
     mealDefaultsConfirmApply: "নিশ্চিত করুন ও প্রয়োগ করুন",
     turnOffAll: "সব বন্ধ",
     bulkMealUpdate: "বাল্ক মিল আপডেট",

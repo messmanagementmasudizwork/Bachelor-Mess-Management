@@ -319,7 +319,7 @@ const en = {
     mealDefaultsFromToday: "Applies today",
     mealDefaultsFromTomorrow: "From tomorrow",
     mealDefaultsCutoffNote: "⚠️ Some slots are locked — cutoff has passed. They will apply from tomorrow.",
-    mealDefaultsVacationNote: "🏖️ Vacation dates are never overwritten.",
+    mealDefaultsVacationNote: "🏖️ Vacation dates and manually turned-off meals are never overwritten.",
     mealDefaultsConfirmApply: "Confirm & Apply",
     turnOffAll: "Turn Off All",
     bulkMealUpdate: "Bulk Meal Update",

@@ -144,10 +144,17 @@ export function useApplyDefaultsToMonth() {
       const futureDays = getDaysInMonth(activeMonth).filter((d) => d > today);
       for (const date of futureDays) {
         if (vacationDates.has(date)) continue; // vacation-set dates are never overwritten
+        const existing = monthMeals.find((m) => m.date === date);
         await mealService.upsertMeal(
           activeMess!.id,
           memberId,
-          { date, breakfast: defaults.breakfast, lunch: defaults.lunch, dinner: defaults.dinner },
+          {
+            date,
+            // Manual OFF (false) is preserved — only apply new default if not manually turned off
+            breakfast: existing?.breakfast === false ? false : defaults.breakfast,
+            lunch:     existing?.lunch     === false ? false : defaults.lunch,
+            dinner:    existing?.dinner    === false ? false : defaults.dinner,
+          },
           user!.id
         );
       }
