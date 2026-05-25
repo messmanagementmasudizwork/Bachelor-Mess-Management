@@ -215,7 +215,10 @@ export function MealLeaveSection({
     const total = allowedDates.length;
     setProgress({ done: 0, total: total || 1 });
     let done = 0;
-    const skippedCount = datesInRange.length - allowedDates.length;
+    const cutoffSkipped = datesInRange.length - allowedDates.length;
+
+    const ALL_SLOTS: MealSlot[] = ["breakfast", "lunch", "dinner"];
+    const slotsChanged: Record<MealSlot, number> = { breakfast: 0, lunch: 0, dinner: 0 };
 
     try {
       for (let i = 0; i < allowedDates.length; i += BATCH_SIZE) {
@@ -223,30 +226,59 @@ export function MealLeaveSection({
         await Promise.all(
           batch.map(async (date) => {
             const existing = getMealForDate(date);
-            // Turn ON → restore the member's recurring default (not blindly true)
-            // Turn OFF → set to false (going on leave)
             const resolveSlot = (slot: MealSlot) => {
               if (!selectedMeals.includes(slot)) return existing?.[slot] ?? true;
               return action === "on" ? mealDefaults[slot] : false;
             };
-            await onUpdate({
-              date,
+            const newValues = {
               breakfast: resolveSlot("breakfast"),
               lunch:     resolveSlot("lunch"),
               dinner:    resolveSlot("dinner"),
-            });
+            };
+            for (const slot of ALL_SLOTS) {
+              const oldVal = existing?.[slot] ?? true;
+              if (newValues[slot] !== oldVal) slotsChanged[slot]++;
+            }
+            await onUpdate({ date, ...newValues });
             done++;
             setProgress({ done, total });
           })
         );
       }
-      toast.success(
-        t.meals.rangeSuccess
-          .replace("{done}", String(done))
-          .replace("{skipped}", String(skippedCount))
-      );
+
+      // ── Build detailed summary toast ──────────────────────────────────
+      const SLOT_LABEL: Record<MealSlot, string> = {
+        breakfast: "🌅 সকাল",
+        lunch:     "☀️ দুপুর",
+        dinner:    "🌙 রাত",
+      };
+
+      const slotsDefaultOff: MealSlot[] = action === "on"
+        ? ALL_SLOTS.filter(s => selectedMeals.includes(s) && !mealDefaults[s])
+        : [];
+
+      const slotParts = ALL_SLOTS.map(slot => {
+        if (!selectedMeals.includes(slot))
+          return `${SLOT_LABEL[slot]}: — (নির্বাচিত হয়নি)`;
+        if (slotsDefaultOff.includes(slot))
+          return `${SLOT_LABEL[slot]}: ০টি (ডিফল্ট বন্ধ)`;
+        return `${SLOT_LABEL[slot]}: ${slotsChanged[slot]}টি`;
+      });
+
+      const title = action === "off"
+        ? `${done}টি তারিখ meal বন্ধ হয়েছে`
+        : `${done}টি তারিখ meal চালু হয়েছে`;
+
+      const descParts = [slotParts.join("  •  ")];
+      if (cutoffSkipped > 0)
+        descParts.push(`⏭️ ${cutoffSkipped}টি তারিখ skip — কাটঅফ পেরিয়ে গেছে`);
+
+      toast.success(title, {
+        description: descParts.join("  |  "),
+        duration: 6000,
+      });
+
       if (action === "off") setActiveOpenPreset(null);
-      // When turning meals ON → clear open leave tracking
       if (action === "on" && memberId) {
         clearOpenLeave.mutate({ memberId, currentStatus: accountStatus });
       }
