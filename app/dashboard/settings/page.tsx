@@ -810,58 +810,63 @@ export default function SettingsPage() {
 
           </div>
 
-          <Separator className="mt-4" />
+        </CardContent>
+      </Card>
 
-          {/* Notification Preferences */}
-          <div>
-            <SectionLabel icon={<Bell className="h-3.5 w-3.5" />} label={t.settings.notificationPreferences} />
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
-              <div className="flex items-center justify-between py-1.5">
+      {/* ── Notification Preferences (separate card) ───────────── */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Bell className="h-4 w-4" />
+            {t.settings.notificationPreferences}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2">
+            <div className="flex items-center justify-between py-1.5">
+              <div className="flex items-center gap-2 min-w-0">
+                {isPushSubscribed
+                  ? <BellRing className="h-3.5 w-3.5 text-primary shrink-0" />
+                  : <BellOff className="h-3.5 w-3.5 text-muted-foreground shrink-0" />}
+                <div className="min-w-0">
+                  <p className="text-xs font-medium truncate">Push Notifications</p>
+                  <p className="text-[10px] text-muted-foreground truncate">
+                    {pushMode === "unsupported"
+                      ? t.notifications.noApiSupportDesc
+                      : pushPermission === "denied"
+                      ? t.notifications.permissionBlocked
+                      : isPushSubscribed
+                      ? t.notifications.pushEnabled
+                      : t.notifications.pushDesc}
+                  </p>
+                </div>
+              </div>
+              <Switch
+                checked={isPushSubscribed}
+                onCheckedChange={(v) => v ? enablePush() : disablePush()}
+                disabled={isPushLoading || pushMode === "unsupported" || pushPermission === "denied"}
+                className="ml-3 shrink-0"
+              />
+            </div>
+            {notifItems.map(({ key, label, desc }) => (
+              <div key={key} className="flex items-center justify-between py-1.5">
                 <div className="flex items-center gap-2 min-w-0">
-                  {isPushSubscribed
+                  {notifPrefs[key]
                     ? <BellRing className="h-3.5 w-3.5 text-primary shrink-0" />
-                    : <BellOff className="h-3.5 w-3.5 text-muted-foreground shrink-0" />}
+                    : <BellOff  className="h-3.5 w-3.5 text-muted-foreground shrink-0" />}
                   <div className="min-w-0">
-                    <p className="text-xs font-medium truncate">Push Notifications</p>
-                    <p className="text-[10px] text-muted-foreground truncate">
-                      {pushMode === "unsupported"
-                        ? t.notifications.noApiSupportDesc
-                        : pushPermission === "denied"
-                        ? t.notifications.permissionBlocked
-                        : isPushSubscribed
-                        ? t.notifications.pushEnabled
-                        : t.notifications.pushDesc}
-                    </p>
+                    <p className="text-xs font-medium truncate">{label}</p>
+                    <p className="text-[10px] text-muted-foreground truncate">{desc}</p>
                   </div>
                 </div>
                 <Switch
-                  checked={isPushSubscribed}
-                  onCheckedChange={(v) => v ? enablePush() : disablePush()}
-                  disabled={isPushLoading || pushMode === "unsupported" || pushPermission === "denied"}
+                  checked={notifPrefs[key] ?? true}
+                  onCheckedChange={(v) => handleNotifPrefChange(key, v)}
                   className="ml-3 shrink-0"
                 />
               </div>
-              {notifItems.map(({ key, label, desc }) => (
-                <div key={key} className="flex items-center justify-between py-1.5">
-                  <div className="flex items-center gap-2 min-w-0">
-                    {notifPrefs[key]
-                      ? <BellRing className="h-3.5 w-3.5 text-primary shrink-0" />
-                      : <BellOff  className="h-3.5 w-3.5 text-muted-foreground shrink-0" />}
-                    <div className="min-w-0">
-                      <p className="text-xs font-medium truncate">{label}</p>
-                      <p className="text-[10px] text-muted-foreground truncate">{desc}</p>
-                    </div>
-                  </div>
-                  <Switch
-                    checked={notifPrefs[key] ?? true}
-                    onCheckedChange={(v) => handleNotifPrefChange(key, v)}
-                    className="ml-3 shrink-0"
-                  />
-                </div>
-              ))}
-            </div>
+            ))}
           </div>
-
         </CardContent>
       </Card>
 
