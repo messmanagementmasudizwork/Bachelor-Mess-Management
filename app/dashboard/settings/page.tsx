@@ -439,7 +439,7 @@ export default function SettingsPage() {
         <CardContent className="space-y-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-stretch">
             {/* Left — avatar + name */}
-            <div className="rounded-xl border bg-muted/20 p-3 flex items-center gap-4">
+            <div className="rounded-xl border bg-muted/20 p-3 flex items-center justify-between gap-4">
               <ImageUpload
                 currentUrl={user?.user_metadata?.avatar_url}
                 fallbackText={getInitials(user?.user_metadata?.full_name ?? user?.email ?? "U")}
@@ -475,7 +475,7 @@ export default function SettingsPage() {
                   }
                 }}
               />
-              <div className="pl-[30px] pr-[30px]">
+              <div className="text-right">
                 <p className="font-semibold">{user?.user_metadata?.full_name ?? t.settings.noName}</p>
                 <p className="text-sm text-muted-foreground">{user?.email}</p>
                 {myMembership && (
