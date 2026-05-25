@@ -443,7 +443,7 @@ export default function SettingsPage() {
               <ImageUpload
                 currentUrl={user?.user_metadata?.avatar_url}
                 fallbackText={getInitials(user?.user_metadata?.full_name ?? user?.email ?? "U")}
-                size="lg"
+                size="xl"
                 onUpload={async (file) => {
                   if (!user?.id) {
                     toast.error("User session not found. Please reload and try again.");

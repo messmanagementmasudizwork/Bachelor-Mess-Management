@@ -13,7 +13,7 @@ interface ImageUploadProps {
   onUpload: (file: File) => Promise<void>;
   onRemove?: () => Promise<void>;
   shape?: "circle" | "square";
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
   className?: string;
   disabled?: boolean;
   accept?: string;
@@ -23,12 +23,14 @@ const SIZE_MAP = {
   sm: "h-12 w-12",
   md: "h-20 w-20",
   lg: "h-28 w-28",
+  xl: "h-36 w-36",
 };
 
 const ICON_SIZE_MAP = {
   sm: "h-4 w-4",
   md: "h-5 w-5",
   lg: "h-7 w-7",
+  xl: "h-8 w-8",
 };
 
 export function ImageUpload({
