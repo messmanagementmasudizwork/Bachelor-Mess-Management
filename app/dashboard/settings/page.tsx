@@ -438,56 +438,51 @@ export default function SettingsPage() {
         </CardHeader>
         <CardContent className="space-y-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-stretch">
-            {/* Left — LinkedIn mini style profile card */}
-            <div className="rounded-xl border overflow-hidden flex flex-col">
-              {/* Gradient banner */}
-              <div className="h-16 bg-gradient-to-br from-primary/30 via-primary/15 to-primary/5 dark:from-primary/20 dark:via-primary/10 dark:to-transparent" />
-              {/* Avatar + info — overlaps banner via negative margin */}
-              <div className="flex flex-col items-center -mt-10 pb-4 px-4 gap-1">
-                <ImageUpload
-                  currentUrl={user?.user_metadata?.avatar_url}
-                  fallbackText={getInitials(user?.user_metadata?.full_name ?? user?.email ?? "U")}
-                  size="lg"
-                  onUpload={async (file) => {
-                    if (!user?.id) {
-                      toast.error("User session not found. Please reload and try again.");
-                      throw new Error("User session not found");
-                    }
-                    try {
-                      const url = await storageService.uploadAvatar(user.id, file);
-                      await authService.updateProfile({ avatar_url: url });
-                      queryClient.invalidateQueries({ queryKey: ["profile", user.id] });
-                      toast.success(t.settings.imageUpdateSuccess);
-                    } catch (err) {
-                      console.error("[PhotoUpload] upload failed:", err);
-                      throw err;
-                    }
-                  }}
-                  onRemove={async () => {
-                    if (!user?.id) {
-                      toast.error("User session not found. Please reload and try again.");
-                      throw new Error("User session not found");
-                    }
-                    try {
-                      await storageService.deleteAvatar(user.id);
-                      await authService.updateProfile({ avatar_url: null });
-                      queryClient.invalidateQueries({ queryKey: ["profile", user.id] });
-                      toast.success(t.settings.imageRemoveSuccess ?? "Photo removed");
-                    } catch (err) {
-                      console.error("[PhotoUpload] remove failed:", err);
-                      throw err;
-                    }
-                  }}
-                />
-                <div className="text-center mt-1">
-                  <p className="font-semibold text-sm">{user?.user_metadata?.full_name ?? t.settings.noName}</p>
-                  <p className="text-xs text-muted-foreground">{user?.email}</p>
-                  {myMembership && (
-                    <Badge variant="secondary" className="mt-1.5 text-xs font-bold">
-                      {getRoleDisplayNameBn(myMembership.role as MemberRole)}
-                    </Badge>
-                  )}
-                </div>
+            {/* Left — avatar + name */}
+            <div className="rounded-xl border bg-muted/20 p-3 flex items-center gap-4">
+              <ImageUpload
+                currentUrl={user?.user_metadata?.avatar_url}
+                fallbackText={getInitials(user?.user_metadata?.full_name ?? user?.email ?? "U")}
+                size="lg"
+                onUpload={async (file) => {
+                  if (!user?.id) {
+                    toast.error("User session not found. Please reload and try again.");
+                    throw new Error("User session not found");
+                  }
+                  try {
+                    const url = await storageService.uploadAvatar(user.id, file);
+                    await authService.updateProfile({ avatar_url: url });
+                    queryClient.invalidateQueries({ queryKey: ["profile", user.id] });
+                    toast.success(t.settings.imageUpdateSuccess);
+                  } catch (err) {
+                    console.error("[PhotoUpload] upload failed:", err);
+                    throw err;
+                  }
+                }}
+                onRemove={async () => {
+                  if (!user?.id) {
+                    toast.error("User session not found. Please reload and try again.");
+                    throw new Error("User session not found");
+                  }
+                  try {
+                    await storageService.deleteAvatar(user.id);
+                    await authService.updateProfile({ avatar_url: null });
+                    queryClient.invalidateQueries({ queryKey: ["profile", user.id] });
+                    toast.success(t.settings.imageRemoveSuccess ?? "Photo removed");
+                  } catch (err) {
+                    console.error("[PhotoUpload] remove failed:", err);
+                    throw err;
+                  }
+                }}
+              />
+              <div>
+                <p className="font-semibold">{user?.user_metadata?.full_name ?? t.settings.noName}</p>
+                <p className="text-sm text-muted-foreground">{user?.email}</p>
+                {myMembership && (
+                  <Badge variant="secondary" className="mt-1 text-xs font-bold">
+                    {getRoleDisplayNameBn(myMembership.role as MemberRole)}
+                  </Badge>
+                )}
               </div>
             </div>
 
