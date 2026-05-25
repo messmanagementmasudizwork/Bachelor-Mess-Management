@@ -307,7 +307,12 @@ export function Header() {
           <DropdownMenu>
             <DropdownMenuTrigger className="flex items-center gap-2 rounded-full border border-border bg-muted/60 hover:bg-muted hover:shadow-sm transition-all duration-200 pl-3 pr-1 py-1 cursor-pointer focus:outline-none focus-visible:outline-none data-[state=open]:bg-muted">
               <span className="hidden lg:block text-xs font-medium text-foreground max-w-[96px] truncate leading-none">
-                {user?.user_metadata?.full_name?.split(" ")[0] ?? user?.email?.split("@")[0] ?? "User"}
+                {(() => {
+                  const parts = user?.user_metadata?.full_name?.trim().split(/\s+/) ?? [];
+                  if (parts.length >= 2) return parts[1];
+                  if (parts.length === 1) return parts[0];
+                  return user?.email?.split("@")[0] ?? "User";
+                })()}
               </span>
               <Avatar className="h-6 w-6 flex-shrink-0">
                 <AvatarImage src={user?.user_metadata?.avatar_url} />
