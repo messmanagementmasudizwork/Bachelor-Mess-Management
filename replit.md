@@ -370,6 +370,7 @@ finally { await client.end(); }
 | `030_add_admin_notice_type.sql` | 2026-05-24 | Add `admin_notice` to `notification_type` ENUM — fixes notice/meeting bell notifications |
 | `031_profile_work_room_fields.sql` | 2026-05-24 | Add `company`, `department`, `designation`, `job_joining_date`, `job_id_card_no` to `profiles`; add `building`, `floor_number`, `room_number` to `mess_members` |
 | `007_storage_buckets.sql` (re-run) | 2026-05-25 | Created 4 storage buckets (`avatars`, `mess-logos`, `receipts`, `media`) + 14 RLS policies — was missing, causing "Bucket not found" on photo upload |
+| `032_pin_hash.sql` | 2026-05-25 | Add `pin_hash TEXT` column to `profiles` + 4 RPC functions (`set_action_pin`, `verify_action_pin`, `remove_action_pin`, `is_action_pin_set`) using `pgcrypto` bcrypt — Security PIN now saves to Supabase instead of localStorage-only |
 
 ## Running the App
 

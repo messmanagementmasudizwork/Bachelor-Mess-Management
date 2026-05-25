@@ -129,7 +129,7 @@ export default function SettingsPage() {
   const [savingWork, setSavingWork] = useState(false);
   const [savingRoom, setSavingRoom] = useState(false);
   const [pinDialogMode, setPinDialogMode] = useState<"set" | "change" | "remove" | null>(null);
-  const { isPinSet } = usePinProtection();
+  const { isPinSet, refreshPinStatus } = usePinProtection();
   const pinIsSet = isPinSet();
 
   const updateRoomInfo = useUpdateRoomInfo();
@@ -1004,7 +1004,10 @@ export default function SettingsPage() {
         <PinSetupDialog
           open={!!pinDialogMode}
           mode={pinDialogMode}
-          onClose={() => setPinDialogMode(null)}
+          onClose={() => {
+            setPinDialogMode(null);
+            refreshPinStatus();
+          }}
         />
       )}
     </div>

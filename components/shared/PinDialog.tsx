@@ -20,6 +20,7 @@ export function PinVerifyDialog({ open, onResult, title }: PinVerifyDialogProps)
   const [pin, setPin] = useState("");
   const [showPin, setShowPin] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const { verifyPin } = usePinProtection();
 
@@ -31,16 +32,22 @@ export function PinVerifyDialog({ open, onResult, title }: PinVerifyDialogProps)
     }
   }, [open]);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (pin.length < 4) {
       setError(t.pin.pinMin4);
       return;
     }
-    if (verifyPin(pin)) {
-      onResult(true);
-    } else {
-      setError(t.pin.pinIncorrect);
-      setPin("");
+    setLoading(true);
+    try {
+      const ok = await verifyPin(pin);
+      if (ok) {
+        onResult(true);
+      } else {
+        setError(t.pin.pinIncorrect);
+        setPin("");
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -69,9 +76,10 @@ export function PinVerifyDialog({ open, onResult, title }: PinVerifyDialogProps)
                   setPin(e.target.value.replace(/\D/g, ""));
                   setError("");
                 }}
-                onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+                onKeyDown={(e) => e.key === "Enter" && !loading && handleSubmit()}
                 placeholder={t.pin.pinPlaceholder}
                 className={error ? "border-destructive" : ""}
+                disabled={loading}
               />
               <button
                 type="button"
@@ -84,11 +92,11 @@ export function PinVerifyDialog({ open, onResult, title }: PinVerifyDialogProps)
             {error && <p className="text-xs text-destructive">{error}</p>}
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" className="flex-1" onClick={() => onResult(false)}>
+            <Button variant="outline" className="flex-1" onClick={() => onResult(false)} disabled={loading}>
               <X className="h-4 w-4 mr-1" /> {t.pin.cancel}
             </Button>
-            <Button className="flex-1" onClick={handleSubmit}>
-              {t.pin.confirm}
+            <Button className="flex-1" onClick={handleSubmit} disabled={loading}>
+              {loading ? "..." : t.pin.confirm}
             </Button>
           </div>
         </div>
@@ -111,6 +119,7 @@ export function PinSetupDialog({ open, onClose, mode }: PinSetupDialogProps) {
   const [confirmPin, setConfirmPin] = useState("");
   const [showPin, setShowPin] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const { setPin, verifyPin, removePin } = usePinProtection();
 
   useEffect(() => {
@@ -120,19 +129,30 @@ export function PinSetupDialog({ open, onClose, mode }: PinSetupDialogProps) {
     }
   }, [open, mode]);
 
-  const handleNext = () => {
-    if (step === "current") {
-      if (!verifyPin(currentPin)) { setError(t.pin.currentPinIncorrect); return; }
-      if (mode === "remove") { removePin(); toast.success(t.pin.pinRemoved); onClose(); return; }
-      setStep("new"); setError(""); setCurrentPin("");
-    } else if (step === "new") {
-      if (newPin.length < 4) { setError(t.pin.pinMin4); return; }
-      setStep("confirm"); setError("");
-    } else {
-      if (newPin !== confirmPin) { setError(t.pin.pinMismatch); setConfirmPin(""); return; }
-      setPin(newPin);
-      toast.success(mode === "set" ? t.pin.pinSet : t.pin.pinChanged);
-      onClose();
+  const handleNext = async () => {
+    setLoading(true);
+    try {
+      if (step === "current") {
+        const ok = await verifyPin(currentPin);
+        if (!ok) { setError(t.pin.currentPinIncorrect); return; }
+        if (mode === "remove") {
+          await removePin();
+          toast.success(t.pin.pinRemoved);
+          onClose();
+          return;
+        }
+        setStep("new"); setError(""); setCurrentPin("");
+      } else if (step === "new") {
+        if (newPin.length < 4) { setError(t.pin.pinMin4); return; }
+        setStep("confirm"); setError("");
+      } else {
+        if (newPin !== confirmPin) { setError(t.pin.pinMismatch); setConfirmPin(""); return; }
+        await setPin(newPin);
+        toast.success(mode === "set" ? t.pin.pinSet : t.pin.pinChanged);
+        onClose();
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -165,10 +185,11 @@ export function PinSetupDialog({ open, onClose, mode }: PinSetupDialogProps) {
                 maxLength={8}
                 value={value}
                 onChange={(e) => { setter(e.target.value.replace(/\D/g, "")); setError(""); }}
-                onKeyDown={(e) => e.key === "Enter" && handleNext()}
+                onKeyDown={(e) => e.key === "Enter" && !loading && handleNext()}
                 placeholder={t.pin.pinPlaceholder}
                 className={error ? "border-destructive" : ""}
                 autoFocus
+                disabled={loading}
               />
               <button
                 type="button"
@@ -182,9 +203,9 @@ export function PinSetupDialog({ open, onClose, mode }: PinSetupDialogProps) {
             <p className="text-xs text-muted-foreground">{t.pin.pinHint}</p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" className="flex-1" onClick={onClose}>{t.pin.cancel}</Button>
-            <Button className="flex-1" onClick={handleNext}>
-              {step === "confirm" ? t.pin.setConfirm : t.pin.next}
+            <Button variant="outline" className="flex-1" onClick={onClose} disabled={loading}>{t.pin.cancel}</Button>
+            <Button className="flex-1" onClick={handleNext} disabled={loading}>
+              {loading ? "..." : step === "confirm" ? t.pin.setConfirm : t.pin.next}
             </Button>
           </div>
         </div>
