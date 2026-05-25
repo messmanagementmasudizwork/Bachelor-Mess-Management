@@ -135,9 +135,15 @@ export function useApplyDefaultsToMonth() {
         );
       }
 
-      // Future dates: apply all defaults
+      // Future dates: apply defaults — but skip vacation-protected dates
+      const monthMeals = await mealService.getMonthlyMeals(activeMess!.id, memberId, activeMonth);
+      const vacationDates = new Set(
+        monthMeals.filter((m) => m.vacation_id != null).map((m) => m.date)
+      );
+
       const futureDays = getDaysInMonth(activeMonth).filter((d) => d > today);
       for (const date of futureDays) {
+        if (vacationDates.has(date)) continue; // vacation-set dates are never overwritten
         await mealService.upsertMeal(
           activeMess!.id,
           memberId,
