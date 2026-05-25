@@ -677,9 +677,9 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            {/* ── Date & Time — lg: col 1, row 2 ── */}
+            {/* ── Date & Time — lg: col 3, row 1-2 (span 2 rows) ── */}
             <div className="rounded-xl border bg-muted/20 p-3 flex flex-col gap-2
-                            lg:col-start-1 lg:row-start-2">
+                            lg:col-start-3 lg:row-start-1 lg:row-span-2">
               <SectionLabel icon={<Calendar className="h-3.5 w-3.5" />} label={t.settingsExt.dateTimeSection} />
               <div className="grid grid-cols-2 gap-3 flex-1 content-start">
                 <div>
@@ -766,9 +766,9 @@ export default function SettingsPage() {
               </div>
             </div>
 
-            {/* ── Recurring Meal Defaults — lg: col 3, row 1-2 (span 2 rows) ── */}
+            {/* ── Recurring Meal Defaults — lg: col 1, row 2 ── */}
             <div className="rounded-xl border bg-muted/20 p-3 flex flex-col gap-2
-                            lg:col-start-3 lg:row-start-1 lg:row-span-2">
+                            lg:col-start-1 lg:row-start-2">
               <SectionLabel icon={<Settings2 className="h-3.5 w-3.5" />} label={t.meals.recurringDefaults} />
               <p className="text-xs text-muted-foreground">{t.meals.applyDefaultsNote}</p>
               <div className="grid grid-cols-3 gap-2">
