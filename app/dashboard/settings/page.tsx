@@ -403,9 +403,9 @@ export default function SettingsPage() {
   ];
 
   const currencyOptions: { value: CurrencySymbol; label: string; preview: string; symbolCls: string }[] = [
-    { value: "৳",   label: "৳",   preview: "৳ 1,250",   symbolCls: "font-bengali text-xl font-black leading-none"  },
-    { value: "Tk",  label: "Tk",  preview: "Tk 1,250",  symbolCls: "text-base font-bold leading-none"              },
-    { value: "BDT", label: "BDT", preview: "BDT 1,250", symbolCls: "text-base font-bold leading-none"              },
+    { value: "৳",   label: "৳",   preview: "৳ 1,250",   symbolCls: "font-bengali text-lg font-black leading-none"  },
+    { value: "Tk",  label: "Tk",  preview: "Tk 1,250",  symbolCls: "text-sm font-bold leading-none"               },
+    { value: "BDT", label: "BDT", preview: "BDT 1,250", symbolCls: "text-sm font-bold leading-none"               },
   ];
 
   const timeOptions: { value: TimeFormatPref; label: string; example: string }[] = [
