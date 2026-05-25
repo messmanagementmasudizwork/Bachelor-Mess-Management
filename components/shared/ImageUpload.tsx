@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/lib/hooks/use-language";
+import { toast } from "sonner";
 
 interface ImageUploadProps {
   currentUrl?: string | null;
@@ -57,8 +58,9 @@ export function ImageUpload({
     setLoading(true);
     try {
       await onUpload(file);
-    } catch {
+    } catch (err) {
       setPreview(null);
+      toast.error((err as Error)?.message ?? "Upload failed. Please try again.");
     } finally {
       setLoading(false);
       if (inputRef.current) inputRef.current.value = "";
@@ -72,6 +74,8 @@ export function ImageUpload({
     try {
       await onRemove();
       setPreview(null);
+    } catch (err) {
+      toast.error((err as Error)?.message ?? "Remove failed. Please try again.");
     } finally {
       setLoading(false);
     }
