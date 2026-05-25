@@ -476,7 +476,7 @@ export default function SettingsPage() {
                 }}
               />
               <div className="text-right">
-                <p className="font-semibold">{user?.user_metadata?.full_name ?? t.settings.noName}</p>
+                <p className="font-semibold text-[18px]">{user?.user_metadata?.full_name ?? t.settings.noName}</p>
                 <p className="text-sm text-muted-foreground">{user?.email}</p>
                 {profileData?.phone && (
                   <p className="text-sm text-muted-foreground">{profileData.phone}</p>
