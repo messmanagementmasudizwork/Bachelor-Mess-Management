@@ -34,6 +34,7 @@ interface Props {
   memberId: string | undefined;
   joiningDate?: string;
   accountStatus?: AccountStatus;
+  mealDefaults: { breakfast: boolean; lunch: boolean; dinner: boolean };
   getMealForDate: (date: string) => MealEntry | undefined;
   onUpdate: (input: UpdateMealInput) => Promise<void>;
   isPending: boolean;
@@ -45,7 +46,7 @@ const CONFIRM_THRESHOLD = 7;
 
 export function MealLeaveSection({
   messSettings, myRole, memberId, joiningDate, accountStatus = "active",
-  getMealForDate, onUpdate, isPending,
+  mealDefaults, getMealForDate, onUpdate, isPending,
 }: Props) {
   const { t } = useLanguage();
   const today = getTodayString();
@@ -222,12 +223,17 @@ export function MealLeaveSection({
         await Promise.all(
           batch.map(async (date) => {
             const existing = getMealForDate(date);
-            const isOn = action === "on";
+            // Turn ON → restore the member's recurring default (not blindly true)
+            // Turn OFF → set to false (going on leave)
+            const resolveSlot = (slot: MealSlot) => {
+              if (!selectedMeals.includes(slot)) return existing?.[slot] ?? true;
+              return action === "on" ? mealDefaults[slot] : false;
+            };
             await onUpdate({
               date,
-              breakfast: selectedMeals.includes("breakfast") ? isOn : (existing?.breakfast ?? true),
-              lunch:     selectedMeals.includes("lunch")     ? isOn : (existing?.lunch     ?? true),
-              dinner:    selectedMeals.includes("dinner")    ? isOn : (existing?.dinner    ?? true),
+              breakfast: resolveSlot("breakfast"),
+              lunch:     resolveSlot("lunch"),
+              dinner:    resolveSlot("dinner"),
             });
             done++;
             setProgress({ done, total });

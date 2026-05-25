@@ -179,6 +179,7 @@ export default function MealsPage() {
           memberId={myMembership?.id}
           joiningDate={joiningDate}
           accountStatus={accountStatus}
+          mealDefaults={mealDefaults}
           getMealForDate={getMealForDate}
           onUpdate={(input) => updateMeal.mutateAsync(input)}
           isPending={updateMeal.isPending}
