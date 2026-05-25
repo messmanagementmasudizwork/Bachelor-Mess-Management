@@ -1070,14 +1070,18 @@ export default function SettingsPage() {
                     <Badge variant={isOn ? "default" : "secondary"} className="text-xs">
                       {isOn ? t.meals.mealOn : t.meals.mealOff}
                     </Badge>
-                    <span className="text-xs text-muted-foreground">
+                    <span className={`text-xs ${isToday ? "text-green-600 dark:text-green-400 font-medium" : "text-muted-foreground"}`}>
                       {isToday ? t.meals.mealDefaultsFromToday : t.meals.mealDefaultsFromTomorrow}
                     </span>
                   </div>
                 </div>
               );
             })}
-            <p className="text-xs text-muted-foreground">{t.meals.mealDefaultsCutoffNote}</p>
+            {/* Only show cutoff note when at least one slot is locked to tomorrow */}
+            {pendingSlotStartDates && Object.values(pendingSlotStartDates).some((d) => d !== getTodayString()) && (
+              <p className="text-xs text-amber-600 dark:text-amber-400">{t.meals.mealDefaultsCutoffNote}</p>
+            )}
+            <p className="text-xs text-muted-foreground">{t.meals.mealDefaultsVacationNote}</p>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" className="flex-1" onClick={() => setShowDefaultsDialog(false)}>
