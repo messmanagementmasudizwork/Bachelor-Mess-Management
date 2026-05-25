@@ -478,6 +478,9 @@ export default function SettingsPage() {
               <div className="text-right">
                 <p className="font-semibold">{user?.user_metadata?.full_name ?? t.settings.noName}</p>
                 <p className="text-sm text-muted-foreground">{user?.email}</p>
+                {profileData?.phone && (
+                  <p className="text-sm text-muted-foreground">{profileData.phone}</p>
+                )}
                 {myMembership && (
                   <Badge variant="secondary" className="mt-1 text-xs font-bold">
                     {getRoleDisplayNameBn(myMembership.role as MemberRole)}
